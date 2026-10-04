@@ -511,18 +511,19 @@ def section_dc_over_training(R, runs, out):
     R.data["dc_over_training"] = {str(s): v for s, v in rows.items()}
     st = sorted(rows)
     fig, ax = plt.subplots(figsize=(6, 3.6))
-    for key, lab in (("d99", "d_0.99"), ("d90", "d_0.9")):
+    for key, lab in (("d99", "$d_{0.99}$"), ("d90", "$d_{0.9}$")):
         mu = [mstd(rows[s][key])[0] for s in st]
         sd = [mstd(rows[s][key])[1] for s in st]
         ax.errorbar(st, mu, yerr=sd, marker="o", capsize=3, label=lab)
     ax.set_xscale("log")
     ax.set_xlabel("step")
-    ax.set_ylabel("directions of W1 needed")
+    ax.set_ylabel("directions of $W_1$ needed")
     ax2 = ax.twinx()
-    ax2.plot(st, [mstd(rows[s]["er"])[0] for s in st], "k--", label="ER(W1)")
+    ax2.plot(st, [mstd(rows[s]["er"])[0] for s in st], "k--", label="ER$(W_1)$")
     ax2.set_ylabel("effective rank")
-    ax.legend(loc="upper left", fontsize=8)
-    ax2.legend(loc="lower right", fontsize=8)
+    h1, l1 = ax.get_legend_handles_labels()     # one legend, in the empty upper-right corner
+    h2, l2 = ax2.get_legend_handles_labels()
+    ax2.legend(h1 + h2, l1 + l2, loc="upper right", fontsize=8)
     savefig(out, "fig_dc_over_training.png")
 
 
