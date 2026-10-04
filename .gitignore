@@ -1,0 +1,19 @@
+# smoke tests and logs
+smoke_*/
+*.log
+logs/
+
+# training runs and analysis outputs (regenerate them with the scripts)
+results*/
+analysis_*/
+*.pt
+
+# pre-registered experiments for the next version of the paper (added later)
+PREREGISTRATION.md
+prereg_transformer_timing.py
+analyze_task.py
+
+# Python
+__pycache__/
+*.pyc
+slurm-*.out
