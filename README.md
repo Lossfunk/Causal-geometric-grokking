@@ -1,4 +1,4 @@
-# Subspace Crystallization — experiments for the revised paper
+# Subspace Crystallization (Revised experimental setup)
 
 Every number and figure in the paper should come from the outputs of these
 scripts: `summary.txt` / `summary.json` and the `fig_*.png` files. Nothing is
