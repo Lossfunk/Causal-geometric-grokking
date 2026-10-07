@@ -1,0 +1,409 @@
+main runs: 15 seeds; config: {'p': 97, 'width': 128, 'alpha': 0.35, 'steps': 100000, 'lr': 0.001, 'wd': 0.01, 'log_every': 500, 'loss': 'mse', 'act': 'quadratic', 'rank': None, 'lam_nuc': 0.0, 'nuc_start': 0, 'labels': 'true', 'op': 'add'}
+
+============================================================================
+A. Onset times (Table 3) -- main runs
+============================================================================
+seed      t_g      t_c      lag    t_IPR  IPR lead
+   0    12500    19000     6500     5000      7500
+   1    13000    19000     6000     5000      8000
+   2    13000    22500     9500     5000      8000
+   3    12000    17000     5000     5000      7000
+   4    13000    25500    12500     5000      8000
+   5    12500    20000     7500     5000      7500
+   6    12500    18500     6000     5000      7500
+   7    12500    18000     5500     5000      7500
+   8    12500    22500    10000     5000      7500
+   9    12500    18000     5500     5000      7500
+  10    13000    15000     2000     5000      8000
+  11    12500    23500    11000     5000      7500
+  12    13000    15000     2000     5000      8000
+  13    12500    14500     2000     5000      7500
+  14    12500    17000     4500     5000      7500
+  t_g (test acc >= 95%)            12633 ± 297 (n=15)   [ddof=0 sd: 287]
+  t_c (ER < 99% of running max)    19000 ± 3279 (n=15)   [ddof=0 sd: 3168]
+  lag t_c - t_g                    6367 ± 3248 (n=15)   [ddof=0 sd: 3138]
+  t_IPR (window 0-5000, 3 sd)      5000 ± 0 (n=15)   [ddof=0 sd: 0]
+  IPR lead t_g - t_IPR             7633 ± 297 (n=15)   [ddof=0 sd: 287]
+  seeds with t_c > t_g: 15/15   one-sided t-test: t=7.591, p=1.25e-06, standardized effect=1.96
+  mean lag as % of training: 6.4%;  as % of t_g: 50.4 ± 25.4 (n=15)
+  share of the ER(W1) decrease that happens after t_g: 0.99 ± 0.02 (n=15)  (compare analyze_transformer.py section E)
+  steepest ER(W1) decrease (smoothed, from step 1,000) minus t_g: 9667 ± 3320 (n=15), median 10000;  after t_g in 15/15;  one-sided t=11.28, p=1.0e-08  (same measure in analyze_transformer.py section E)
+
+  accuracy and effective rank before t_g (Stages 1 and 2)
+     step            train acc %             test acc %                 ER(W1)
+     1000     5.56 ± 0.48 (n=15)     0.66 ± 0.14 (n=15)   114.31 ± 0.25 (n=15)
+     4000    61.83 ± 0.79 (n=15)     0.13 ± 0.05 (n=15)   114.83 ± 0.27 (n=15)
+     6000    89.74 ± 0.79 (n=15)     0.45 ± 0.09 (n=15)   115.17 ± 0.23 (n=15)
+     7000    95.23 ± 0.69 (n=15)     1.46 ± 0.43 (n=15)   115.33 ± 0.23 (n=15)
+     8000    97.80 ± 0.44 (n=15)     4.86 ± 1.38 (n=15)   115.46 ± 0.25 (n=15)
+     9000    99.13 ± 0.32 (n=15)    15.06 ± 4.23 (n=15)   115.59 ± 0.30 (n=15)
+    10000    99.69 ± 0.16 (n=15)    37.03 ± 8.02 (n=15)   115.72 ± 0.36 (n=15)
+    11000    99.93 ± 0.05 (n=15)    67.33 ± 8.89 (n=15)   115.83 ± 0.44 (n=15)
+    12000    99.99 ± 0.01 (n=15)    90.15 ± 4.82 (n=15)   115.89 ± 0.53 (n=15)
+  first step with train acc >= 90%: 6333 ± 244 (n=15)
+  first step with train acc >= 99%: 9133 ± 297 (n=15)
+  first step with train acc >= 99.9%: 10867 ± 481 (n=15)
+
+============================================================================
+B. Cross-correlation of dER/dt and dAcc/dt (Fig. 7b)
+============================================================================
+  trough of mean curve at tau = +12500 steps
+  per-seed trough lags: 11900 ± 3296 (n=15)
+  max |C(tau)| for tau in [-80000, -5000]: 0.394
+
+============================================================================
+C. Granger-type test of predictive precedence (App. / Sec. 6.2)
+============================================================================
+  statsmodels' grangercausalitytests failed in 15 seeds (TypeError: grangercausalitytests() got an unexpected keyword argument 'verbose'); the numpy F-test below does not use it
+
+  [first differences only (as in the paper)]  n=15
+    ADF p (dER): 0.070 ± 0.074 (n=15);  stationary in 8/15 seeds
+    ADF p (dAcc): 0.023 ± 0.025 (n=15);  stationary in 13/15 seeds
+    H0: compression -> grokking    mean F=2.84  mean p=0.133  median p=0.059  rejected in 6/15
+    H0: grokking -> compression    mean F=24.77  mean p=0.003  median p=0.000  rejected in 15/15
+
+  [differenced until ADF p < 0.05]  n=15
+    ADF p (dER): 0.010 ± 0.014 (n=15);  stationary in 15/15 seeds
+    ADF p (dAcc): 0.012 ± 0.012 (n=15);  stationary in 15/15 seeds
+    H0: compression -> grokking    mean F=2.44  mean p=0.257  median p=0.126  rejected in 4/15
+    H0: grokking -> compression    mean F=19.77  mean p=0.003  median p=0.000  rejected in 15/15
+
+============================================================================
+D. Label-free onset detection: windows x thresholds, all metrics (Sec. 6.1, Table 4)
+============================================================================
+  detected = seeds where the detector fires; early = fires before t_g;
+  at start = fires at the first logged step after the window, i.e. as soon as it
+  is allowed to (a trend, not an event); false alarms = random-label runs
+  (never generalize) where it fires.
+
+  metric=fourier_ipr (up)
+      window   k  detected   early  at start  median lead  false alarms
+        2500   2    15/15   15/15     15/15         10000       5/5
+        2500   3    15/15   15/15     14/15         10000       5/5
+        2500   4    15/15   15/15      9/15         10000       5/5
+        5000   2    15/15   15/15     15/15          7500       5/5
+        5000   3    15/15   15/15     15/15          7500       5/5
+        5000   4    15/15   15/15      7/15          7500       5/5
+       10000   2    15/15   15/15     15/15          2500       5/5
+       10000   3    15/15   15/15     14/15          2500       5/5
+       10000   4    15/15   15/15      0/15          1500       5/5
+
+  metric=spectral_ipr (up)
+      window   k  detected   early  at start  median lead  false alarms
+        2500   2    15/15    0/15      0/15        -12500       5/5
+        2500   3    15/15    0/15      0/15        -12500       5/5
+        2500   4    15/15    0/15      0/15        -13000       5/5
+        5000   2    15/15    0/15      0/15        -12500       5/5
+        5000   3    15/15    0/15      0/15        -13000       5/5
+        5000   4    15/15    0/15      0/15        -13500       4/5
+       10000   2    15/15    0/15      0/15        -13000       5/5
+       10000   3    15/15    0/15      0/15        -14500       4/5
+       10000   4    15/15    0/15      0/15        -16000       4/5
+
+  metric=W1_erank (down)
+      window   k  detected   early  at start  median lead  false alarms
+        2500   2    15/15    0/15      0/15         -8000       5/5
+        2500   3    15/15    0/15      0/15         -8000       5/5
+        2500   4    15/15    0/15      0/15         -8000       4/5
+        5000   2    15/15    0/15      0/15         -8000       5/5
+        5000   3    15/15    0/15      0/15         -8000       4/5
+        5000   4    15/15    0/15      0/15         -8500       4/5
+       10000   2    15/15    0/15      0/15         -8000       5/5
+       10000   3    15/15    0/15      0/15         -9000       4/5
+       10000   4    15/15    0/15      0/15        -10500       4/5
+
+  metric=W1_srank (down)
+      window   k  detected   early  at start  median lead  false alarms
+        2500   2    15/15    2/15      1/15        -13500       5/5
+        2500   3    15/15    1/15      0/15        -16500       5/5
+        2500   4    15/15    1/15      0/15        -18500       5/5
+        5000   2    15/15    0/15      0/15        -14500       5/5
+        5000   3    15/15    0/15      0/15        -17500       4/5
+        5000   4    15/15    0/15      0/15        -22500       4/5
+       10000   2    15/15    0/15      0/15        -13000       5/5
+       10000   3    15/15    0/15      0/15        -19500       4/5
+       10000   4    15/15    0/15      0/15        -23500       3/5
+
+  metric=W1_l0 (both)
+      window   k  detected   early  at start  median lead  false alarms
+        2500   2    15/15   15/15      3/15          9000       5/5
+        2500   3    14/15   13/15      2/15          7000       5/5
+        2500   4     8/15    5/15      1/15          6500       1/5
+        5000   2    14/15   13/15      3/15          6500       4/5
+        5000   3     3/15    2/15      0/15          2500       1/5
+        5000   4     0/15    0/15      0/15           n/a       0/5
+       10000   2     0/15    0/15      0/15           n/a       0/5
+       10000   3     0/15    0/15      0/15           n/a       0/5
+       10000   4     0/15    0/15      0/15           n/a       0/5
+
+  metric=W1_hoyer (both)
+      window   k  detected   early  at start  median lead  false alarms
+        2500   2    15/15   15/15      0/15          9000       5/5
+        2500   3    15/15   15/15      0/15          9000       5/5
+        2500   4    15/15   15/15      0/15          8500       5/5
+        5000   2    15/15   15/15     15/15          7500       5/5
+        5000   3    15/15   15/15     15/15          7500       5/5
+        5000   4    15/15   15/15      0/15          7000       5/5
+       10000   2     0/15    0/15      0/15           n/a       1/5
+       10000   3     0/15    0/15      0/15           n/a       0/5
+       10000   4     0/15    0/15      0/15           n/a       0/5
+
+  metric=grad_norm (both)
+      window   k  detected   early  at start  median lead  false alarms
+        2500   2    15/15   15/15      0/15          9500       5/5
+        2500   3    15/15   15/15      0/15          9000       5/5
+        2500   4    15/15   15/15      0/15          9000       5/5
+        5000   2    15/15   15/15      9/15          7500       5/5
+        5000   3    15/15   15/15      0/15          2500       0/5
+        5000   4    15/15   15/15      0/15          1000       0/5
+       10000   2    15/15   15/15      0/15          1500       5/5
+       10000   3     9/15    3/15      0/15             0       3/5
+       10000   4     0/15    0/15      0/15           n/a       0/5
+
+============================================================================
+E. Causal dimensionality of W1 (App. B, Fig. 3a), controls (Table 2), complement tests
+============================================================================
+  App. B -- d_tau = smallest k whose top-k truncation keeps >= tau x clean accuracy
+    tau=0.9    d = 80.5 ± 3.7 (n=15)
+    tau=0.95   d = 84.5 ± 3.2 (n=15)
+    tau=0.99   d = 89.1 ± 2.3 (n=15)
+    tau=0.999  d = 93.1 ± 2.7 (n=15)
+  variance counts of W1 (directions carrying 95% / 99% of sum sigma^2): k95 = 78.9 ± 2.7 (n=15), k99 = 98.4 ± 3.2 (n=15)
+
+  Table 2 (MLP row) -- truncations of W1 at k = d_0.99 (per seed), test accuracy
+    top-k                                            99.26 ± 0.22 (n=15) %
+    bottom-k                                         28.26 ± 6.18 (n=15) %
+    random k of the singular directions (10 draws)   31.26 ± 4.37 (n=15) %
+    random k-dim subspace of R^128 (10 draws)        22.74 ± 3.93 (n=15) %
+
+  Complement interventions on pre-activations h (C = top-d_0.99 left singular subspace)
+    keep only C      : 99.26 ± 0.22 (n=15) %
+    keep only C-perp : 0.15 ± 0.14 (n=15) %
+    noise of norm s*||h|| added inside C or inside C-perp:
+      s=0.1   in C: 99.97 ± 0.05 (n=15) %   in C-perp: 99.95 ± 0.07 (n=15) %
+      s=0.3   in C: 92.42 ± 4.22 (n=15) %   in C-perp: 70.97 ± 9.69 (n=15) %
+      s=1.0   in C: 10.11 ± 2.06 (n=15) %   in C-perp: 7.43 ± 1.32 (n=15) %
+      s=3.0   in C: 1.54 ± 0.10 (n=15) %   in C-perp: 1.61 ± 0.09 (n=15) %
+
+============================================================================
+E2. Causal dimensionality over training (does the sufficient subspace change in Stage 4?)
+============================================================================
+  every saved checkpoint from step 10,000 on; d_tau is relative to that checkpoint's own
+  test accuracy, so read it together with the accuracy column
+     step           test acc %                d_0.9               d_0.99               ER(W1)          #freq (90%)
+    10000    37.0 ± 8.0 (n=15)    97.5 ± 3.2 (n=15)   120.5 ± 3.5 (n=15)   115.7 ± 0.4 (n=15)    40.8 ± 0.4 (n=15)
+    11000    67.3 ± 8.9 (n=15)    95.2 ± 2.1 (n=15)   119.3 ± 3.2 (n=15)   115.8 ± 0.4 (n=15)    40.3 ± 0.7 (n=15)
+    12500    95.7 ± 2.7 (n=15)    81.7 ± 3.2 (n=15)   109.5 ± 3.2 (n=15)   115.9 ± 0.6 (n=15)    39.7 ± 0.5 (n=15)
+    15000   100.0 ± 0.0 (n=15)    59.6 ± 1.8 (n=15)    77.0 ± 3.6 (n=15)   115.6 ± 0.8 (n=15)    38.5 ± 0.6 (n=15)
+    20000   100.0 ± 0.0 (n=15)    50.8 ± 2.5 (n=15)    64.9 ± 1.7 (n=15)   114.4 ± 1.1 (n=15)    38.2 ± 1.1 (n=15)
+    30000   100.0 ± 0.0 (n=15)    56.4 ± 2.4 (n=15)    69.3 ± 1.7 (n=15)   110.9 ± 1.5 (n=15)    38.3 ± 0.9 (n=15)
+    50000   100.0 ± 0.0 (n=15)    68.3 ± 2.6 (n=15)    81.5 ± 2.4 (n=15)   107.0 ± 1.9 (n=15)    36.1 ± 1.4 (n=15)
+    99999   100.0 ± 0.0 (n=15)    80.5 ± 3.7 (n=15)    89.1 ± 2.3 (n=15)   104.0 ± 2.1 (n=15)    33.7 ± 1.9 (n=15)
+
+============================================================================
+E4. Is the narrowing of d_0.99 a margin effect? Margin-free criteria over training
+============================================================================
+  d by criterion: 99% of test accuracy (d_0.99, margin-dependent); test MSE <= 1.01 x clean;
+  outputs within 10% / 5% of the clean outputs (relative Frobenius norm); test set, main runs
+     step              test acc %           median margin             d (99% acc)             d (MSE +1%)         d (outputs 10%)          d (outputs 5%)
+    10000       37.0 ± 8.0 (n=15)   -0.017 ± 0.011 (n=15)      120.5 ± 3.5 (n=15)      13.6 ± 33.3 (n=15)      122.1 ± 0.3 (n=15)      126.3 ± 0.5 (n=15)
+    11000       67.3 ± 8.9 (n=15)    0.025 ± 0.014 (n=15)      119.3 ± 3.2 (n=15)      102.9 ± 4.3 (n=15)      122.4 ± 0.5 (n=15)      126.6 ± 0.5 (n=15)
+    12500       95.7 ± 2.7 (n=15)    0.105 ± 0.017 (n=15)      109.5 ± 3.2 (n=15)      112.5 ± 1.8 (n=15)      122.8 ± 0.4 (n=15)      126.8 ± 0.4 (n=15)
+    15000      100.0 ± 0.0 (n=15)    0.257 ± 0.021 (n=15)       77.0 ± 3.6 (n=15)      119.4 ± 1.5 (n=15)      122.8 ± 0.7 (n=15)      126.3 ± 0.5 (n=15)
+    20000      100.0 ± 0.0 (n=15)    0.470 ± 0.019 (n=15)       64.9 ± 1.7 (n=15)      123.2 ± 1.0 (n=15)      122.3 ± 0.9 (n=15)      125.7 ± 0.6 (n=15)
+    30000      100.0 ± 0.0 (n=15)    0.570 ± 0.012 (n=15)       69.3 ± 1.7 (n=15)      126.0 ± 0.8 (n=15)      124.9 ± 1.1 (n=15)      126.9 ± 0.8 (n=15)
+    50000      100.0 ± 0.0 (n=15)    0.599 ± 0.009 (n=15)       81.5 ± 2.4 (n=15)      127.5 ± 0.7 (n=15)      126.7 ± 0.5 (n=15)      127.7 ± 0.6 (n=15)
+    99999      100.0 ± 0.0 (n=15)    0.611 ± 0.008 (n=15)       89.1 ± 2.3 (n=15)      127.7 ± 0.5 (n=15)      127.3 ± 0.6 (n=15)      127.9 ± 0.4 (n=15)
+
+============================================================================
+E3. Why the sufficient subspace widens in Stage 4 (weight growth x quadratic activation)
+============================================================================
+  K = 65 (median d_0.99 at step 20,000, where the sufficient subspace is narrowest)
+  'size' = sqrt(sum of sigma_i^2) over the top K or the remaining 63 directions of W1;
+  output change = median over test inputs of the L2 norm of the change in the 97 outputs
+  caused by removing the directions beyond the top K, split into the two terms of
+  (h_top + h_rest)^2 - h_top^2 = 2 h_top h_rest + h_rest^2
+
+  [main runs, n=15]
+                                                 20000             30000             50000             99999
+  d_0.99                                    64.9 ± 1.7        69.3 ± 1.7        81.5 ± 2.4        89.1 ± 2.3
+  ER(W1)                                   114.4 ± 1.1       110.9 ± 1.5       107.0 ± 1.9       104.0 ± 2.1
+  ||W1||_F                                     731 ± 7          813 ± 14          937 ± 26         1059 ± 35
+  ||W2||_F                                     531 ± 5          597 ± 11          685 ± 21          763 ± 27
+  sigma_1(W1)                              111.9 ± 3.4       132.2 ± 3.0      171.1 ± 10.4      217.8 ± 21.6
+  size of top 65                              659 ± 10          748 ± 18          878 ± 29         1002 ± 37
+  size beyond top 65                          316 ± 10          318 ± 10          327 ± 13          344 ± 18
+  test acc, top-65 truncation %             99.1 ± 0.4        97.7 ± 0.9        84.5 ± 5.5        57.7 ± 9.5
+  median correct-class output            0.604 ± 0.017     0.696 ± 0.010     0.722 ± 0.008     0.732 ± 0.007
+  median margin                          0.470 ± 0.019     0.570 ± 0.012     0.599 ± 0.009     0.611 ± 0.008
+  output change: 2 h_top h_rest          0.611 ± 0.015     0.699 ± 0.014     0.860 ± 0.063     1.153 ± 0.128
+  output change: h_rest^2                0.254 ± 0.019     0.336 ± 0.022     0.445 ± 0.029     0.533 ± 0.047
+  loss push on ||theta||^2 (GD terms)          7.82e-04          3.25e-04          2.54e-04          2.19e-04
+  weight-decay pull wd*||theta||^2            8.16e+03          1.02e+04          1.35e+04          1.71e+04
+  (gradient-flow terms; under plain gradient descent the norm grows only if push > pull,
+   so growth with push << pull comes from AdamW's normalised updates)
+
+  [weight decay: step 20,000 -> final checkpoint]
+  weight decay    n         d_0.99           ER(W1)         ||W1||_F        sigma_1   size beyond 65  final test %   #freq 90/99% (end)
+  0               5   65.8 -> 95.0    114.6 -> 98.7      731 -> 1252     114 -> 251       320 -> 358         100.0      30.0 / 44.6    
+  1e-3            5   65.4 -> 93.8    114.7 -> 99.3      731 -> 1220     113 -> 249       320 -> 354         100.0      30.2 / 44.8    
+  1e-2 (main)     5   65.2 -> 88.6   115.0 -> 104.9      727 -> 1043     111 -> 205       320 -> 347         100.0      33.8 / 45.2    
+  5e-2            5   64.0 -> 73.0   115.7 -> 113.7       710 -> 825     101 -> 151       321 -> 342         100.0      37.8 / 46.2    
+  1e-1            5   62.4 -> 63.0   116.7 -> 116.7       678 -> 748      92 -> 108       311 -> 346         100.0      38.8 / 45.8    
+
+============================================================================
+F. Temporal stability of the sufficient subspace (App. C)
+============================================================================
+  k = 89 (median d_0.99);  mean t_g = 12633
+     step     hidden-space subspace (C)      input-space subspace
+        0          0.775 ± 0.003 (n=15)      0.608 ± 0.003 (n=15)
+     2500          0.777 ± 0.003 (n=15)      0.614 ± 0.003 (n=15)
+     5000          0.782 ± 0.003 (n=15)      0.623 ± 0.003 (n=15)
+     7500          0.790 ± 0.004 (n=15)      0.642 ± 0.005 (n=15)
+     8000          0.792 ± 0.004 (n=15)      0.648 ± 0.006 (n=15)
+     9000          0.799 ± 0.004 (n=15)      0.661 ± 0.007 (n=15)
+    10000          0.807 ± 0.005 (n=15)      0.677 ± 0.007 (n=15)
+    11000          0.817 ± 0.006 (n=15)      0.694 ± 0.008 (n=15)
+    12500          0.837 ± 0.007 (n=15)      0.723 ± 0.010 (n=15)
+    15000          0.875 ± 0.010 (n=15)      0.773 ± 0.012 (n=15)
+    20000          0.925 ± 0.013 (n=15)      0.843 ± 0.013 (n=15)
+    30000          0.961 ± 0.013 (n=15)      0.910 ± 0.011 (n=15)
+    50000          0.983 ± 0.012 (n=15)      0.967 ± 0.013 (n=15)
+  random baseline     0.773 ± 0.003 (k in R^128)   0.606 ± 0.003 (k in R^194)
+
+============================================================================
+G. Cross-seed subspace overlap (Sec. 5)
+============================================================================
+  frequencies used by W1 (operand a), f and p-f merged; compare 2 x #freq with d_0.99
+    seed  0: top-5 share 0.36   #freq for 90% of power 33   for 99% 46   d_0.99 = 90
+    seed  1: top-5 share 0.27   #freq for 90% of power 35   for 99% 45   d_0.99 = 86
+    seed  2: top-5 share 0.30   #freq for 90% of power 31   for 99% 45   d_0.99 = 93
+    seed  3: top-5 share 0.26   #freq for 90% of power 35   for 99% 45   d_0.99 = 86
+    seed  4: top-5 share 0.28   #freq for 90% of power 35   for 99% 45   d_0.99 = 88
+    seed  5: top-5 share 0.29   #freq for 90% of power 34   for 99% 45   d_0.99 = 87
+    seed  6: top-5 share 0.25   #freq for 90% of power 36   for 99% 46   d_0.99 = 92
+    seed  7: top-5 share 0.24   #freq for 90% of power 34   for 99% 45   d_0.99 = 87
+    seed  8: top-5 share 0.28   #freq for 90% of power 36   for 99% 46   d_0.99 = 88
+    seed  9: top-5 share 0.28   #freq for 90% of power 30   for 99% 45   d_0.99 = 93
+    seed 10: top-5 share 0.33   #freq for 90% of power 33   for 99% 45   d_0.99 = 90
+    seed 11: top-5 share 0.35   #freq for 90% of power 32   for 99% 44   d_0.99 = 90
+    seed 12: top-5 share 0.28   #freq for 90% of power 36   for 99% 46   d_0.99 = 90
+    seed 13: top-5 share 0.29   #freq for 90% of power 33   for 99% 45   d_0.99 = 89
+    seed 14: top-5 share 0.31   #freq for 90% of power 32   for 99% 45   d_0.99 = 87
+  top-5 share 0.29 ± 0.03 (n=15);  #freq (90%) 33.7 ± 1.9 (n=15);  #freq (99%) 45.2 ± 0.6 (n=15)
+  2 x #freq (90%) = 67.3  vs  d_0.99 = 89.1;  Pearson r across seeds = -0.47
+  2 x #freq (99%) = 90.4  vs  d_0.99 = 89.1;  Pearson r across seeds = 0.15
+  15 seeds, 105 pairs
+  key frequencies per seed (top 5, f and p-f merged):
+    seed  0: [6, 31, 36, 44, 48]   (DC share of power: 0.026)
+    seed  1: [4, 13, 22, 26, 29]   (DC share of power: 0.020)
+    seed  2: [12, 29, 34, 39, 40]   (DC share of power: 0.035)
+    seed  3: [2, 6, 17, 18, 43]   (DC share of power: 0.027)
+    seed  4: [1, 7, 20, 34, 42]   (DC share of power: 0.029)
+    seed  5: [26, 28, 29, 30, 33]   (DC share of power: 0.011)
+    seed  6: [2, 21, 28, 37, 48]   (DC share of power: 0.035)
+    seed  7: [3, 16, 23, 35, 44]   (DC share of power: 0.077)
+    seed  8: [1, 20, 36, 38, 46]   (DC share of power: 0.004)
+    seed  9: [3, 26, 31, 36, 37]   (DC share of power: 0.028)
+    seed 10: [1, 10, 17, 32, 45]   (DC share of power: 0.031)
+    seed 11: [4, 5, 8, 35, 36]   (DC share of power: 0.008)
+    seed 12: [12, 17, 32, 33, 45]   (DC share of power: 0.016)
+    seed 13: [8, 24, 35, 37, 39]   (DC share of power: 0.035)
+    seed 14: [2, 21, 23, 42, 46]   (DC share of power: 0.080)
+  weight-subspace overlap (top-60, input space): 0.466 ± 0.027 (n=105)   random: 0.487 ± 0.005
+  Fourier-subspace overlap (5 key freqs, 10 dims): 0.088 ± 0.127 (n=105)   random: 0.270 ± 0.018
+  [original construction, for comparison]: 0.331 ± 0.118 (n=105)
+  Jaccard overlap of key-frequency sets: 0.051 ± 0.078 (n=105)
+  shared directions (cos > 0.9 in top-60), per pair: 5.78 ± 1.97 (n=105)   random expectation: 1.38
+    shared direction 0 (seeds 0,1, cos=0.912): a: DC 0.01, f=7 0.66; b: DC 0.00, f=7 0.68
+
+============================================================================
+H. Activation patching sanity check (MLP, one seed)
+============================================================================
+  clean accuracy 100.00%
+  sigma=0.1: corrupted 10.06%  pre-patched 100.00%  post-patched 100.00%
+  sigma=0.3: corrupted 1.59%  pre-patched 100.00%  post-patched 100.00%
+  sigma=0.5: corrupted 1.16%  pre-patched 100.00%  post-patched 100.00%
+  (with one hidden layer, patching the whole pre- or post-activation restores the clean output by construction)
+
+============================================================================
+I. Transplant patching with and without Procrustes alignment (App. D)
+============================================================================
+  fit the rotation on model A's training inputs, evaluate on A's test inputs,
+  against the true (a+b) mod p labels.
+  grokked -> grokked (other seed)                          unaligned 1.03 ± 0.30 (n=14) %   aligned 95.71 ± 2.32 (n=14) %
+  grokked -> memorizing (random labels)                    unaligned 1.55 ± 0.26 (n=5) %   aligned 0.91 ± 0.45 (n=5) %
+  memorizing (random labels) -> grokked                    unaligned 1.03 ± 0.11 (n=5) %   aligned 0.66 ± 0.12 (n=5) %
+  grokked -> same seed, memorization-phase checkpoint      unaligned 35.55 ± 6.55 (n=15) %   aligned 85.23 ± 4.75 (n=15) %
+  memorization-phase checkpoint -> grokked                 unaligned 36.18 ± 6.40 (n=15) %   aligned 25.09 ± 5.77 (n=15) %
+  chance = 1.03 %
+  memorization-phase checkpoint = last checkpoint with train acc >= 99% and test acc <= 50%:
+    steps [10000], test accuracy there 37.0 ± 8.0 (n=15) %
+
+============================================================================
+J. Variants: loss, weight decay, activation, rank interventions
+============================================================================
+  (final Fourier IPR: 0.5 = every unit uses one frequency; ~0.03 = no periodic structure)
+
+  [loss]
+  MSE (main)     grokked 5/5  t_g 12700 ± 447 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 104.9 ± 1.6 (n=5)  Stage-4 ER drop 9.7 ± 1.5 (n=5)%  final Fourier IPR 0.457 ± 0.009 (n=5)
+  CE lr=1e-3     grokked 1/5  t_g 94500 ± 0 (n=1)  final test 93.7 ± 2.0 (n=5)%  final ER 114.1 ± 0.3 (n=5)  Stage-4 ER drop 0.1 ± 0.0 (n=1)%  final Fourier IPR 0.200 ± 0.008 (n=5)
+  CE lr=3e-3     grokked 5/5  t_g 27500 ± 2372 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 102.4 ± 0.6 (n=5)  Stage-4 ER drop 10.9 ± 0.5 (n=5)%  final Fourier IPR 0.292 ± 0.009 (n=5)
+  CE lr=1e-2     grokked 5/5  t_g 10100 ± 962 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 71.1 ± 2.2 (n=5)  Stage-4 ER drop 37.9 ± 1.9 (n=5)%  final Fourier IPR 0.324 ± 0.011 (n=5)
+
+  [weight decay]
+  wd=0           grokked 5/5  t_g 12700 ± 447 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 98.7 ± 2.2 (n=5)  Stage-4 ER drop 14.9 ± 1.9 (n=5)%  final Fourier IPR 0.452 ± 0.010 (n=5)
+  wd=1e-3        grokked 5/5  t_g 12700 ± 447 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 99.3 ± 2.1 (n=5)  Stage-4 ER drop 14.4 ± 1.9 (n=5)%  final Fourier IPR 0.453 ± 0.008 (n=5)
+  wd=1e-2 (main) grokked 5/5  t_g 12700 ± 447 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 104.9 ± 1.6 (n=5)  Stage-4 ER drop 9.7 ± 1.5 (n=5)%  final Fourier IPR 0.457 ± 0.009 (n=5)
+  wd=5e-2        grokked 5/5  t_g 12800 ± 274 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 113.7 ± 0.8 (n=5)  Stage-4 ER drop 2.2 ± 0.4 (n=5)%  final Fourier IPR 0.466 ± 0.006 (n=5)
+  wd=1e-1        grokked 5/5  t_g 13400 ± 418 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 116.7 ± 1.7 (n=5)  Stage-4 ER drop 0.5 ± 0.4 (n=5)%  final Fourier IPR 0.476 ± 0.004 (n=5)
+
+  [activation]
+  quadratic (main) grokked 5/5  t_g 12700 ± 447 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 104.9 ± 1.6 (n=5)  Stage-4 ER drop 9.7 ± 1.5 (n=5)%  final Fourier IPR 0.457 ± 0.009 (n=5)
+  ReLU           grokked 5/5  t_g 44900 ± 4615 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 80.8 ± 0.8 (n=5)  Stage-4 ER drop 14.0 ± 1.3 (n=5)%  final Fourier IPR 0.332 ± 0.028 (n=5)
+  GELU           grokked 5/5  t_g 33400 ± 1140 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 79.2 ± 1.8 (n=5)  Stage-4 ER drop 16.8 ± 1.3 (n=5)%  final Fourier IPR 0.474 ± 0.010 (n=5)
+
+  [nuclear-norm penalty on W1 from step 0]
+  lambda=0 (main) grokked 5/5  t_g 12700 ± 447 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 104.9 ± 1.6 (n=5)  Stage-4 ER drop 9.7 ± 1.5 (n=5)%  final Fourier IPR 0.457 ± 0.009 (n=5)
+  lambda=1e-08   grokked 5/5  t_g 12800 ± 274 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 103.5 ± 2.2 (n=5)  Stage-4 ER drop 10.7 ± 1.8 (n=5)%  final Fourier IPR 0.447 ± 0.018 (n=5)
+  lambda=3e-08   grokked 5/5  t_g 12800 ± 274 (n=5)  final test 100.0 ± 0.1 (n=5)%  final ER 106.3 ± 1.3 (n=5)  Stage-4 ER drop 7.7 ± 1.0 (n=5)%  final Fourier IPR 0.461 ± 0.013 (n=5)
+  lambda=1e-07   grokked 5/5  t_g 16200 ± 447 (n=5)  final test 100.0 ± 0.0 (n=5)%  final ER 100.7 ± 3.4 (n=5)  Stage-4 ER drop 5.0 ± 1.6 (n=5)%  final Fourier IPR 0.476 ± 0.016 (n=5)
+  lambda=3e-07   grokked 0/5  t_g n/a  final test 0.8 ± 0.1 (n=5)%  final ER 1.2 ± 0.3 (n=5)  Stage-4 ER drop n/a%  final Fourier IPR 0.029 ± 0.003 (n=5)
+  lambda=1e-06   grokked 0/5  t_g n/a  final test 1.1 ± 0.1 (n=5)%  final ER 110.8 ± 0.4 (n=5)  Stage-4 ER drop n/a%  final Fourier IPR 0.020 ± 0.000 (n=5)
+    ER(W1) shortly before the baseline's mean t_g (step 11500):
+      lambda=0 (main)  115.9 ± 0.3 (n=5)
+      lambda=1e-08     115.6 ± 0.3 (n=5)
+      lambda=3e-08     114.6 ± 0.4 (n=5)
+      lambda=1e-07     78.5 ± 3.4 (n=5)
+      lambda=3e-07     1.1 ± 0.2 (n=5)
+      lambda=1e-06     110.6 ± 0.4 (n=5)
+
+  [hard bottleneck W1 = AB]
+  rank 8         grokked 0/3  t_g n/a  final test 27.8 ± 6.1 (n=3)%  final ER 8.0 ± 0.0 (n=3)  Stage-4 ER drop n/a%  final Fourier IPR 0.288 ± 0.006 (n=3)
+  rank 16        grokked 0/3  t_g n/a  final test 55.3 ± 10.6 (n=3)%  final ER 15.8 ± 0.0 (n=3)  Stage-4 ER drop n/a%  final Fourier IPR 0.189 ± 0.009 (n=3)
+  rank 32        grokked 3/3  t_g 4500 ± 0 (n=3)  final test 99.5 ± 0.3 (n=3)%  final ER 29.5 ± 0.1 (n=3)  Stage-4 ER drop 6.2 ± 0.2 (n=3)%  final Fourier IPR 0.357 ± 0.034 (n=3)
+  rank 48        grokked 3/3  t_g 3167 ± 289 (n=3)  final test 100.0 ± 0.0 (n=3)%  final ER 38.0 ± 0.6 (n=3)  Stage-4 ER drop 18.3 ± 1.2 (n=3)%  final Fourier IPR 0.499 ± 0.015 (n=3)
+  rank 64        grokked 3/3  t_g 2667 ± 289 (n=3)  final test 100.0 ± 0.0 (n=3)%  final ER 46.0 ± 3.7 (n=3)  Stage-4 ER drop 23.6 ± 6.0 (n=3)%  final Fourier IPR 0.441 ± 0.108 (n=3)
+  rank 80        grokked 3/3  t_g 2500 ± 0 (n=3)  final test 100.0 ± 0.0 (n=3)%  final ER 49.4 ± 1.2 (n=3)  Stage-4 ER drop 33.3 ± 2.1 (n=3)%  final Fourier IPR 0.599 ± 0.011 (n=3)
+  rank 96        grokked 3/3  t_g 2167 ± 289 (n=3)  final test 100.0 ± 0.0 (n=3)%  final ER 63.0 ± 5.7 (n=3)  Stage-4 ER drop 27.1 ± 7.3 (n=3)%  final Fourier IPR 0.565 ± 0.008 (n=3)
+  AB, rank 128   grokked 3/3  t_g 2000 ± 0 (n=3)  final test 99.9 ± 0.2 (n=3)%  final ER 89.1 ± 0.9 (n=3)  Stage-4 ER drop 15.9 ± 1.0 (n=3)%  final Fourier IPR 0.436 ± 0.038 (n=3)
+  W1, full (main) grokked 3/3  t_g 12833 ± 289 (n=3)  final test 100.0 ± 0.0 (n=3)%  final ER 104.9 ± 1.1 (n=3)  Stage-4 ER drop 9.8 ± 1.0 (n=3)%  final Fourier IPR 0.463 ± 0.005 (n=3)
+    'AB, rank 128' is factorised like the bottlenecks but has full rank: if it groks as early
+    as rank 32-96, the speed-up comes from the factorisation, not from the rank limit.
+    effective rank of W1 before and after grokking: factorised r=128 vs unfactorised (seeds 0-2)
+       step           AB, rank 128        W1, full (main)
+          0       92.7 ± 0.3 (n=3)      114.6 ± 0.1 (n=3)
+        500       79.7 ± 1.0 (n=3)      114.5 ± 0.1 (n=3)
+       1000       97.4 ± 0.6 (n=3)      114.5 ± 0.1 (n=3)
+       1500      105.5 ± 0.3 (n=3)      114.6 ± 0.2 (n=3)
+       2000      105.9 ± 0.3 (n=3)      114.7 ± 0.2 (n=3)
+       3000      102.4 ± 2.0 (n=3)      114.9 ± 0.2 (n=3)
+       5000       94.8 ± 3.3 (n=3)      115.1 ± 0.1 (n=3)
+      10000       89.8 ± 2.7 (n=3)      115.9 ± 0.1 (n=3)
+      20000       88.5 ± 2.1 (n=3)      115.1 ± 0.4 (n=3)
+
+============================================================================
+K. Figures from one main run
+============================================================================
+  fig_rank_derivatives.png stage boundaries (seed 0): Stage 2 from 8000 (test acc > 5%), Stage 3 from t_g = 12500, Stage 4 from t_c = 19000
+  weight perturbation (noise sd = sigma x sd of each matrix): 0.0:100%, 0.3:71%, 0.6:14%, 0.9:5%, 1.2:3%, 1.5:2%

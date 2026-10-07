@@ -27,6 +27,9 @@ DEFAULTS = dict(
     p=P, width=WIDTH, alpha=0.35, steps=100_000, lr=1e-3, wd=1e-2,
     log_every=500, loss="mse", act="quadratic", rank=None,
     lam_nuc=0.0, nuc_start=0, labels="true", op="add",
+    optimizer="adamw",            # "adamw" or "sgd" (same per-step decay lr * wd * w)
+    eps=1e-8, momentum=0.0,       # AdamW epsilon and SGD momentum (torch defaults)
+    init_ckpt=None, init_step=0,  # continue from checkpoint `init_step` of a saved run
 )
 
 # Checkpoints kept for the stability / transplant analyses. Steps beyond the
@@ -37,7 +40,8 @@ CKPT_STEPS = [0, 2500, 5000, 7500, 8000, 9000, 10000, 11000, 12500,
 HIST_KEYS = ["steps", "train_loss", "test_loss", "train_acc", "test_acc",
              "W1_erank", "W2_erank", "W1_srank", "W2_srank",
              "fourier_ipr", "spectral_ipr", "fourier_erank",
-             "W1_hoyer", "W1_l0", "W1_norm", "W2_norm", "grad_norm"]
+             "W1_hoyer", "W1_l0", "W1_norm", "W2_norm", "grad_norm",
+             "radial_update", "radial_decay"]
 
 
 # ---------------------------------------------------------------- data
@@ -171,6 +175,18 @@ def l0_sparsity(W, thr=1e-3):
 
 
 # ---------------------------------------------------------------- training
+def make_optimizer(model, c):
+    """AdamW (decoupled decay) or plain SGD with weight decay. Both shrink every
+    weight by lr * wd * w per step; they differ only in the loss-driven step."""
+    c = {**DEFAULTS, **c}              # configs saved before eps / momentum existed
+    if c["optimizer"] == "adamw":
+        return torch.optim.AdamW(model.parameters(), lr=c["lr"], weight_decay=c["wd"], eps=c["eps"])
+    if c["optimizer"] == "sgd":
+        return torch.optim.SGD(model.parameters(), lr=c["lr"], weight_decay=c["wd"],
+                               momentum=c["momentum"])
+    raise ValueError(c["optimizer"])
+
+
 def train_run(seed, cfg=None, device="cpu", ckpt_steps=CKPT_STEPS, verbose=True):
     """Train one model; return a dict with config, history, checkpoints."""
     c = {**DEFAULTS, **(cfg or {})}
@@ -184,16 +200,30 @@ def train_run(seed, cfg=None, device="cpu", ckpt_steps=CKPT_STEPS, verbose=True)
         y = y[torch.randperm(len(y), generator=g)]
 
     model = MeanFieldMLP(c["p"], c["width"], c["act"], c["rank"]).to(device)
+    off = 0
+    if c["init_ckpt"]:                 # continue a saved run: same seed, same split
+        if c["rank"] is not None:
+            raise ValueError("init_ckpt supports the unfactorised model only")
+        base = load_run(c["init_ckpt"])
+        if not torch.equal(base["train_idx"], tr.cpu()):
+            raise ValueError(f"{c['init_ckpt']} has a different train split; use the same seed")
+        w = base["ckpts"][c["init_step"]]
+        with torch.no_grad():
+            model.W1_full.copy_(w["W1"])
+            model.W2.copy_(w["W2"])
+        off = c["init_step"]
     X, y = X.to(device), y.to(device)
     Xtr, ytr, Xte, yte = X[tr], y[tr], X[te], y[te]
-    opt = torch.optim.AdamW(model.parameters(), lr=c["lr"], weight_decay=c["wd"])
+    opt = make_optimizer(model, c)
+    params = list(model.parameters())
 
     hist = {k: [] for k in HIST_KEYS}
     ckpts = {}
-    keep = {s for s in ckpt_steps if s < c["steps"]}
-    last = c["steps"] - 1
+    keep = {s for s in ckpt_steps if off <= s < off + c["steps"]}
+    last = off + c["steps"] - 1             # steps are counted from the start of the base run
 
-    for step in range(c["steps"]):
+    for i in range(c["steps"]):
+        step = off + i
         opt.zero_grad()
         out = model(Xtr)
         loss = compute_loss(out, ytr, c["loss"])
@@ -205,7 +235,15 @@ def train_run(seed, cfg=None, device="cpu", ckpt_steps=CKPT_STEPS, verbose=True)
         if log_now:
             gnorm = math.sqrt(sum(float(q.grad.pow(2).sum())
                                   for q in model.parameters() if q.grad is not None))
+            old = [q.detach().clone() for q in params]
         opt.step()
+        if log_now:
+            # radial forces on the weight norm in this step: <theta, delta theta> in total,
+            # and the part due to weight decay (-lr * wd * ||theta||^2); the rest is the
+            # loss-driven (optimizer) part
+            with torch.no_grad():
+                r_upd = sum(float((o * (q - o)).sum()) for o, q in zip(old, params))
+                r_dec = -c["lr"] * c["wd"] * sum(float(o.pow(2).sum()) for o in old)
 
         if log_now:
             with torch.no_grad():
@@ -228,6 +266,8 @@ def train_run(seed, cfg=None, device="cpu", ckpt_steps=CKPT_STEPS, verbose=True)
                 hist["W1_norm"].append(float(W1.norm()))
                 hist["W2_norm"].append(float(W2.norm()))
                 hist["grad_norm"].append(gnorm)
+                hist["radial_update"].append(r_upd)
+                hist["radial_decay"].append(r_dec)
             if verbose and step % (c["log_every"] * 20) == 0:
                 print(f"    step {step:>6}  train_acc={hist['train_acc'][-1]:.3f}  "
                       f"test_acc={hist['test_acc'][-1]:.3f}  ER(W1)={hist['W1_erank'][-1]:.1f}",

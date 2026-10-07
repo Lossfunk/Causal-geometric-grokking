@@ -1,0 +1,203 @@
+15 transformer runs at wd=1, config {'frac': 0.3, 'steps': 25000, 'lr': 0.001, 'wd': 1.0, 'betas': (0.9, 0.98), 'log_every': 250}
+14 grokked (final test accuracy >= 95%) and are used in sections A-H and J;
+non-grokked runs (negative controls, section N): ['wd=1 seed 12', 'wd=0.1 seed 0', 'wd=0.1 seed 1', 'wd=0.1 seed 2', 'wd=0.3 seed 0', 'wd=0.3 seed 1', 'wd=0.3 seed 2']
+
+============================================================================
+A. Spectra and variance thresholds (Fig. 8)
+============================================================================
+  matrix                           k95 (variance)                   k99 (variance)                  k95 (sum of sv)
+  W_E                8.8 ± 1.5 (n=14, median 8.5)   30.4 ± 4.0 (n=14, median 28.5)   62.6 ± 1.6 (n=14, median 62.0)
+  W_Q                4.0 ± 0.0 (n=14, median 4.0)     4.0 ± 0.0 (n=14, median 4.0)     4.0 ± 0.0 (n=14, median 4.0)
+  W_K                4.0 ± 0.0 (n=14, median 4.0)     4.0 ± 0.0 (n=14, median 4.0)     4.0 ± 0.0 (n=14, median 4.0)
+  W_V              18.5 ± 2.6 (n=14, median 18.5)   24.3 ± 2.6 (n=14, median 24.5)   25.1 ± 1.4 (n=14, median 25.5)
+  W_O              13.2 ± 1.4 (n=14, median 12.5)   21.3 ± 4.7 (n=14, median 20.0)   55.1 ± 6.0 (n=14, median 55.5)
+  W_in             13.1 ± 1.4 (n=14, median 12.5)   18.1 ± 3.8 (n=14, median 16.0)   51.9 ± 7.7 (n=14, median 50.0)
+  W_out              8.6 ± 1.4 (n=14, median 9.0)   11.8 ± 2.5 (n=14, median 12.0)   32.8 ± 8.5 (n=14, median 32.0)
+  W_U              10.3 ± 1.3 (n=14, median 10.0)   23.8 ± 2.8 (n=14, median 23.5)   46.2 ± 2.2 (n=14, median 46.5)
+  MLP post-act     14.4 ± 3.3 (n=14, median 13.0)   23.6 ± 7.2 (n=14, median 22.5)                                -
+
+============================================================================
+B. Accuracy-preserving rank d_c (Table 6) and C. truncation controls (Table 2)
+============================================================================
+  matrix          max rank             d_c (99% of clean acc)
+  W_E                   97       7.7 ± 1.5 (n=14, median 8.0)
+  W_Q                   32       2.6 ± 0.5 (n=14, median 3.0)
+  W_K                   32       2.4 ± 0.7 (n=14, median 2.0)
+  W_V                   32     10.9 ± 1.5 (n=14, median 11.0)
+  W_O                  128     12.8 ± 1.3 (n=14, median 12.0)
+  W_in                 128     13.0 ± 1.3 (n=14, median 12.5)
+  W_out                128       8.7 ± 1.5 (n=14, median 9.0)
+  W_U                   98       8.8 ± 1.4 (n=14, median 9.0)
+  MLP post-act         512     17.2 ± 3.3 (n=14, median 17.0)
+
+  controls at k = d_c (test accuracy, %):
+  W_E    top 99.74 ± 0.35 (n=14) | bottom 1.01 ± 0.06 (n=14) | random subset 1.33 ± 0.23 (n=14) | random subspace 1.31 ± 0.13 (n=14)
+  W_U    top 99.86 ± 0.27 (n=14) | bottom 1.07 ± 0.32 (n=14) | random subset 1.80 ± 0.65 (n=14) | random subspace 6.02 ± 1.92 (n=14)
+  W_in   top 99.80 ± 0.28 (n=14) | bottom 5.50 ± 1.46 (n=14) | random subset 3.50 ± 0.54 (n=14) | random subspace 12.49 ± 2.99 (n=14)
+  W_out  top 99.95 ± 0.07 (n=14) | bottom 5.50 ± 1.46 (n=14) | random subset 4.42 ± 0.95 (n=14) | random subspace 8.00 ± 1.93 (n=14)
+
+============================================================================
+D. Subspace alignment along the residual stream (k = 11 = 2 x 5 key frequencies + DC)
+============================================================================
+  random baseline (two random 11-dim subspaces of R^128): 0.248 ± 0.017
+  attention write (W_O) vs MLP read (W_in)             0.923 ± 0.035 (n=14)
+  MLP read (W_in) vs MLP write (W_out)                 0.330 ± 0.050 (n=14)
+  MLP write (W_out) vs unembed read (W_U)              0.885 ± 0.078 (n=14)
+  MLP read (W_in) vs key-frequency subspace of W_E     0.252 ± 0.018 (n=14)
+  MLP write (W_out) vs key-frequency subspace of W_E   0.254 ± 0.019 (n=14)
+  key frequencies of W_E (seed 0): [41, 7, 10, 20, 26]
+
+============================================================================
+E. Timing of compression in the transformer (Table 1)
+============================================================================
+  seed  0: t_g=12500  t_c(W_in)=1000  lag=-11500  share of ER(W_in) decrease after t_g=0.32
+  seed  1: t_g=11000  t_c(W_in)=1000  lag=-10000  share of ER(W_in) decrease after t_g=0.29
+  seed  2: t_g=11250  t_c(W_in)=1000  lag=-10250  share of ER(W_in) decrease after t_g=0.30
+  seed  3: t_g=7750  t_c(W_in)=1000  lag=-6750  share of ER(W_in) decrease after t_g=0.35
+  seed  4: t_g=10000  t_c(W_in)=1000  lag=-9000  share of ER(W_in) decrease after t_g=0.27
+  seed  5: t_g=9500  t_c(W_in)=1000  lag=-8500  share of ER(W_in) decrease after t_g=0.33
+  seed  6: t_g=6500  t_c(W_in)=1000  lag=-5500  share of ER(W_in) decrease after t_g=0.31
+  seed  7: t_g=10500  t_c(W_in)=1000  lag=-9500  share of ER(W_in) decrease after t_g=0.34
+  seed  8: t_g=21000  t_c(W_in)=1000  lag=-20000  share of ER(W_in) decrease after t_g=0.25
+  seed  9: t_g=9500  t_c(W_in)=1000  lag=-8500  share of ER(W_in) decrease after t_g=0.30
+  seed 10: t_g=11250  t_c(W_in)=1000  lag=-10250  share of ER(W_in) decrease after t_g=0.36
+  seed 11: t_g=12500  t_c(W_in)=1000  lag=-11500  share of ER(W_in) decrease after t_g=0.38
+  seed 13: t_g=18750  t_c(W_in)=1000  lag=-17750  share of ER(W_in) decrease after t_g=0.34
+  seed 14: t_g=17750  t_c(W_in)=1000  lag=-16750  share of ER(W_in) decrease after t_g=0.27
+  t_g 12125 ± 4198 (n=14);  t_c 1000 ± 0 (n=14);  lag -11125 ± 4198 (n=14)
+  the MLP's t_c rule (ER 1% below its running max, from step 1000) fires at its first eligible
+  step in 14/14 seeds: with wd=1 the random initialisation decays from step 0, so
+  ER falls from the start and this rule does not mark a compression event here.
+  t_c > t_g in 0/14 seeds; one-sided t=-9.92, p=1.00e+00
+
+  share of each matrix's ER decrease (max up to t_g -> final) that happens after t_g:
+    W_E    0.22 ± 0.05 (n=14, median 0.23)
+    W_Q    -0.00 ± 0.00 (n=14, median -0.00)
+    W_K    0.00 ± 0.01 (n=14, median 0.00)
+    W_V    0.62 ± 0.12 (n=14, median 0.65)
+    W_O    0.27 ± 0.04 (n=14, median 0.28)
+    W_in   0.31 ± 0.04 (n=14, median 0.32)
+    W_out  0.38 ± 0.04 (n=14, median 0.38)
+    W_U    0.37 ± 0.05 (n=14, median 0.37)
+
+  steepest ER(W_in) decrease (smoothed, from step 4,000) minus t_g: 964 ± 499 (n=14, median 1125);  after t_g in 13/14;  one-sided t=7.24, p=3.3e-06  (same measure in analyze_mlp.py section A)
+
+  cross-correlation of dER(W_in)/dt and dAcc/dt (tau > 0: rank changes lag accuracy changes)
+  trough of the mean curve at tau = +2250 steps;  per-seed troughs -10893 ± 4245 (n=14, median -9750)
+
+============================================================================
+F. IPR onset sensitivity (Table 4)
+============================================================================
+  early = fires before t_g, out of the seeds with t_g > window (only those can be early);
+  at start = fires at the first logged step after the window; false alarms = non-grokked
+  runs (see section N) where it fires: 7 runs.
+
+  metric=W_in_spectral_ipr
+      window   k  detected   early  at start  median lead  false alarms
+        2500   2    14/14   14/14      0/14          6750       7/7
+        2500   3    14/14   14/14      0/14          3125       7/7
+        2500   4    14/14   14/14      0/14          1750       7/7
+        5000   2    14/14   14/14      1/14          2875       7/7
+        5000   3    14/14   14/14      0/14          1625       7/7
+        5000   4    14/14   14/14      0/14          1000       6/7
+       10000   2    14/14    9/9       8/14          1125       7/7
+       10000   3    14/14    9/9       5/14           750       3/7
+       10000   4    14/14    8/9       1/14           375       3/7
+
+  metric=E_fourier_ipr
+      window   k  detected   early  at start  median lead  false alarms
+        2500   2    14/14   14/14      2/14          8125       7/7
+        2500   3    14/14   14/14      0/14          7625       7/7
+        2500   4    14/14   14/14      0/14          7125       7/7
+        5000   2    14/14   14/14     11/14          6125       7/7
+        5000   3    14/14   14/14      0/14          5250       7/7
+        5000   4    14/14   14/14      0/14          4750       7/7
+       10000   2    13/14    9/9      12/14          1250       7/7
+       10000   3    13/14    9/9       6/14          1000       7/7
+       10000   4    12/14    9/9       0/14           625       7/7
+
+============================================================================
+G. Pre/post MLP activation patching sanity check (embedding noise)
+============================================================================
+  sigma=0.3: corrupted 18.52%, pre patched 99.92%, post patched 99.92%
+
+============================================================================
+H. Logit geometry (Fig. 9a)
+============================================================================
+  seed 0: top-5 logit frequencies [7, 10, 14, 15, 41] carry 87.9% of the logit power (each input's mean removed)
+  PCA of the logits: PC1-4 explain 54.9%, 31.4%, 7.1%, 3.6%
+
+============================================================================
+I. Alignment vs weight decay and grokking (T3), k = 11
+============================================================================
+  random baseline: 0.248
+  wd=0.1   not grokked  n=3   MLP read/write 0.269 ± 0.024 (n=3)   attention write/MLP read 0.839 ± 0.021 (n=3)   t_g n/a
+  wd=0.3   not grokked  n=3   MLP read/write 0.271 ± 0.043 (n=3)   attention write/MLP read 0.918 ± 0.048 (n=3)   t_g n/a
+  wd=1     grokked      n=14  MLP read/write 0.330 ± 0.050 (n=14)   attention write/MLP read 0.923 ± 0.035 (n=14)   t_g 12125 ± 4198 (n=14)
+  wd=1     not grokked  n=1   MLP read/write 0.218 ± 0.000 (n=1)   attention write/MLP read 0.947 ± 0.000 (n=1)   t_g n/a
+
+============================================================================
+J. Frequencies used (is d_c about 2 x the number of key frequencies?)
+============================================================================
+  W_E: top-5 share 0.95 ± 0.01 (n=14);  #freq for 90% of power 4.2 ± 0.7 (n=14);  for 99% 30.8 ± 3.4 (n=14)
+  W_U: top-5 share 0.86 ± 0.03 (n=14);  #freq for 90% of power 8.1 ± 2.3 (n=14);  for 99% 37.6 ± 2.0 (n=14)
+  2 x #freq (90%, W_E) = 8.4 ± 1.4 (n=14)
+  d_c(W_E) = 7.7 ± 1.5 (n=14, median 8.0)
+  d_c(W_O) = 12.8 ± 1.3 (n=14, median 12.0)
+  d_c(W_in) = 13.0 ± 1.3 (n=14, median 12.5)
+  d_c(W_out) = 8.7 ± 1.5 (n=14, median 9.0)
+  d_c(W_U) = 8.8 ± 1.4 (n=14, median 9.0)
+
+============================================================================
+K. Accuracy-preserving rank over training (does it change after grokking?)
+============================================================================
+  saved checkpoints from step 10,000 on; d_c is relative to that checkpoint's own
+  test accuracy, so read it together with the accuracy column
+     step             test acc %               d_c(W_E)              d_c(W_in)             d_c(W_out)               d_c(W_U)
+    10000     57.4 ± 40.0 (n=14)      19.4 ± 9.9 (n=14)      18.2 ± 7.2 (n=14)     21.2 ± 15.3 (n=14)     20.0 ± 18.7 (n=14)
+    11000     68.6 ± 41.1 (n=14)      17.2 ± 9.7 (n=14)      17.5 ± 8.2 (n=14)     19.3 ± 25.0 (n=14)     20.3 ± 24.2 (n=14)
+    12500     80.1 ± 38.7 (n=14)      13.7 ± 8.0 (n=14)      15.4 ± 6.1 (n=14)     14.4 ± 13.1 (n=14)     14.3 ± 15.3 (n=14)
+    15000     81.2 ± 37.6 (n=14)      10.9 ± 6.0 (n=14)      14.2 ± 4.7 (n=14)      11.0 ± 5.8 (n=14)     12.4 ± 12.4 (n=14)
+    20000      97.6 ± 9.0 (n=14)       8.4 ± 1.9 (n=14)      12.4 ± 1.5 (n=14)       9.4 ± 2.2 (n=14)       9.2 ± 1.8 (n=14)
+    24999     100.0 ± 0.0 (n=14)       7.7 ± 1.5 (n=14)      13.0 ± 1.3 (n=14)       8.7 ± 1.5 (n=14)       8.8 ± 1.4 (n=14)
+
+============================================================================
+L. Is d_c a margin effect? Margin-free criteria, each seed aligned at its own t_g
+============================================================================
+  d by criterion: 99% of test accuracy (d_c, margin-dependent); cross-entropy <= 1.01 x clean;
+  centred final-position logits within 10% / 5% of the clean logits (relative Frobenius norm)
+  checkpoints per seed: the last one before t_g, the first one at or after t_g, and the final one
+
+  [last checkpoint before t_g]  n=14  test acc 62.3 ± 30.3 (n=14) %  median logit margin 2.32 ± 7.51 (n=14)
+  matrix               d (99% acc)              d (CE +1%)          d (logits 10%)           d (logits 5%)
+  W_E            20.1 ± 7.0 (n=14)      23.8 ± 18.6 (n=14)       23.1 ± 4.2 (n=14)       28.2 ± 2.5 (n=14)
+  W_in           20.5 ± 5.6 (n=14)      22.4 ± 13.2 (n=14)       22.1 ± 5.3 (n=14)       27.1 ± 3.8 (n=14)
+  W_out          13.1 ± 6.0 (n=14)       10.1 ± 3.9 (n=14)      26.1 ± 12.9 (n=14)      40.0 ± 11.1 (n=14)
+  W_U           13.9 ± 12.0 (n=14)        9.5 ± 2.7 (n=14)      33.4 ± 13.5 (n=14)      47.5 ± 10.3 (n=14)
+
+  [first checkpoint at or after t_g]  n=14  test acc 99.3 ± 1.0 (n=14) %  median logit margin 10.87 ± 3.04 (n=14)
+  matrix               d (99% acc)              d (CE +1%)          d (logits 10%)           d (logits 5%)
+  W_E            11.3 ± 3.7 (n=14)      54.3 ± 16.7 (n=14)       13.5 ± 3.4 (n=14)       20.4 ± 5.2 (n=14)
+  W_in           14.4 ± 2.3 (n=14)       25.4 ± 6.9 (n=14)       14.8 ± 1.7 (n=14)       17.1 ± 2.5 (n=14)
+  W_out           9.3 ± 2.0 (n=14)       12.8 ± 5.6 (n=14)        9.4 ± 2.1 (n=14)       13.9 ± 5.9 (n=14)
+  W_U             9.1 ± 1.8 (n=14)      17.6 ± 14.6 (n=14)       10.3 ± 3.2 (n=14)      19.2 ± 11.0 (n=14)
+
+  [final checkpoint]  n=14  test acc 100.0 ± 0.0 (n=14) %  median logit margin 12.60 ± 2.91 (n=14)
+  matrix               d (99% acc)              d (CE +1%)          d (logits 10%)           d (logits 5%)
+  W_E             7.7 ± 1.5 (n=14)      25.1 ± 17.9 (n=14)        8.1 ± 1.7 (n=14)       10.0 ± 2.0 (n=14)
+  W_in           13.0 ± 1.3 (n=14)       16.9 ± 4.0 (n=14)       13.0 ± 1.9 (n=14)       14.1 ± 2.4 (n=14)
+  W_out           8.7 ± 1.5 (n=14)       10.8 ± 2.1 (n=14)        8.7 ± 1.5 (n=14)        8.8 ± 1.6 (n=14)
+  W_U             8.8 ± 1.4 (n=14)      17.4 ± 13.4 (n=14)        8.8 ± 1.6 (n=14)        9.5 ± 1.7 (n=14)
+
+============================================================================
+N. Runs that did not grok within the step budget (negative controls)
+============================================================================
+  k99 = number of singular directions for 99% of the variance (as in section A)
+  run                  train    test     W_E    W_Q    W_K    W_V    W_O   W_in  W_out    W_U
+  wd=1 seed 12        100.0%    8.2%      42      4      4     30     42     68     62     62
+  wd=0.1 seed 0       100.0%    4.3%      43      4     19     31     50     82     78     72
+  wd=0.1 seed 1       100.0%    1.8%      43      4     18     31     51     81     78     73
+  wd=0.1 seed 2       100.0%    3.0%      44      4     18     31     52     84     79     73
+  wd=0.3 seed 0       100.0%   13.2%      34      4      4     31     43     74     61     62
+  wd=0.3 seed 1       100.0%   10.7%      36      4      4     31     43     73     61     62
+  wd=0.3 seed 2       100.0%    9.1%      37      4      4     30     43     77     65     65

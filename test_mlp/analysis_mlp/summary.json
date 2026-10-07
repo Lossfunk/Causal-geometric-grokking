@@ -1,0 +1,1017 @@
+{
+ "onsets": [
+  {
+   "seed": 0,
+   "tg": 12500,
+   "tc": 19000,
+   "tipr": 5000,
+   "lag": 6500,
+   "lead": 7500
+  },
+  {
+   "seed": 1,
+   "tg": 13000,
+   "tc": 19000,
+   "tipr": 5000,
+   "lag": 6000,
+   "lead": 8000
+  }
+ ],
+ "xcorr": {
+  "trough": 7500,
+  "per_seed": [
+   5000,
+   8000
+  ]
+ },
+ "granger": {
+  "original": [
+   {
+    "seed": 0,
+    "adf_dER": 0.958475032668748,
+    "adf_dAcc": 0.006691604616948792,
+    "error": "grangercausalitytests() got an unexpected keyword argument 'verbose'"
+   },
+   {
+    "seed": 1,
+    "adf_dER": 0.06926504474248361,
+    "adf_dAcc": 0.2992361501481967,
+    "error": "grangercausalitytests() got an unexpected keyword argument 'verbose'"
+   }
+  ],
+  "stationary": [
+   {
+    "seed": 0,
+    "extra_diffs": [
+     1,
+     0
+    ],
+    "adf_dER": 0.0030152939626974457,
+    "adf_dAcc": 0.0058132998691872925,
+    "error": "grangercausalitytests() got an unexpected keyword argument 'verbose'"
+   },
+   {
+    "seed": 1,
+    "extra_diffs": [
+     2,
+     1
+    ],
+    "adf_dER": 1.7740907089593372e-05,
+    "adf_dAcc": 0.004957746962872753,
+    "error": "grangercausalitytests() got an unexpected keyword argument 'verbose'"
+   }
+  ]
+ },
+ "onset_sensitivity": {
+  "fourier_ipr|2500|2": {
+   "onsets": [
+    2500,
+    2500
+   ],
+   "leads": [
+    10000,
+    10500
+   ],
+   "false_alarms": []
+  },
+  "fourier_ipr|2500|3": {
+   "onsets": [
+    2500,
+    2500
+   ],
+   "leads": [
+    10000,
+    10500
+   ],
+   "false_alarms": []
+  },
+  "fourier_ipr|2500|4": {
+   "onsets": [
+    2500,
+    2500
+   ],
+   "leads": [
+    10000,
+    10500
+   ],
+   "false_alarms": []
+  },
+  "fourier_ipr|5000|2": {
+   "onsets": [
+    5000,
+    5000
+   ],
+   "leads": [
+    7500,
+    8000
+   ],
+   "false_alarms": []
+  },
+  "fourier_ipr|5000|3": {
+   "onsets": [
+    5000,
+    5000
+   ],
+   "leads": [
+    7500,
+    8000
+   ],
+   "false_alarms": []
+  },
+  "fourier_ipr|5000|4": {
+   "onsets": [
+    5500,
+    5000
+   ],
+   "leads": [
+    7000,
+    8000
+   ],
+   "false_alarms": []
+  },
+  "fourier_ipr|10000|2": {
+   "onsets": [
+    10000,
+    10000
+   ],
+   "leads": [
+    2500,
+    3000
+   ],
+   "false_alarms": []
+  },
+  "fourier_ipr|10000|3": {
+   "onsets": [
+    10000,
+    10000
+   ],
+   "leads": [
+    2500,
+    3000
+   ],
+   "false_alarms": []
+  },
+  "fourier_ipr|10000|4": {
+   "onsets": [
+    11000,
+    11000
+   ],
+   "leads": [
+    1500,
+    2000
+   ],
+   "false_alarms": []
+  },
+  "spectral_ipr|2500|2": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "spectral_ipr|2500|3": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "spectral_ipr|2500|4": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "spectral_ipr|5000|2": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "spectral_ipr|5000|3": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "spectral_ipr|5000|4": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "spectral_ipr|10000|2": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "spectral_ipr|10000|3": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "spectral_ipr|10000|4": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_erank|2500|2": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_erank|2500|3": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_erank|2500|4": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_erank|5000|2": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_erank|5000|3": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_erank|5000|4": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_erank|10000|2": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_erank|10000|3": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_erank|10000|4": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_srank|2500|2": {
+   "onsets": [
+    null,
+    2500
+   ],
+   "leads": [
+    null,
+    10500
+   ],
+   "false_alarms": []
+  },
+  "W1_srank|2500|3": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_srank|2500|4": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_srank|5000|2": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_srank|5000|3": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_srank|5000|4": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_srank|10000|2": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_srank|10000|3": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_srank|10000|4": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_l0|2500|2": {
+   "onsets": [
+    4500,
+    3500
+   ],
+   "leads": [
+    8000,
+    9500
+   ],
+   "false_alarms": []
+  },
+  "W1_l0|2500|3": {
+   "onsets": [
+    8000,
+    4500
+   ],
+   "leads": [
+    4500,
+    8500
+   ],
+   "false_alarms": []
+  },
+  "W1_l0|2500|4": {
+   "onsets": [
+    null,
+    5000
+   ],
+   "leads": [
+    null,
+    8000
+   ],
+   "false_alarms": []
+  },
+  "W1_l0|5000|2": {
+   "onsets": [
+    7500,
+    8000
+   ],
+   "leads": [
+    5000,
+    5000
+   ],
+   "false_alarms": []
+  },
+  "W1_l0|5000|3": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_l0|5000|4": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_l0|10000|2": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_l0|10000|3": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_l0|10000|4": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_hoyer|2500|2": {
+   "onsets": [
+    3500,
+    3500
+   ],
+   "leads": [
+    9000,
+    9500
+   ],
+   "false_alarms": []
+  },
+  "W1_hoyer|2500|3": {
+   "onsets": [
+    3500,
+    3500
+   ],
+   "leads": [
+    9000,
+    9500
+   ],
+   "false_alarms": []
+  },
+  "W1_hoyer|2500|4": {
+   "onsets": [
+    4000,
+    4000
+   ],
+   "leads": [
+    8500,
+    9000
+   ],
+   "false_alarms": []
+  },
+  "W1_hoyer|5000|2": {
+   "onsets": [
+    5000,
+    5000
+   ],
+   "leads": [
+    7500,
+    8000
+   ],
+   "false_alarms": []
+  },
+  "W1_hoyer|5000|3": {
+   "onsets": [
+    5000,
+    5000
+   ],
+   "leads": [
+    7500,
+    8000
+   ],
+   "false_alarms": []
+  },
+  "W1_hoyer|5000|4": {
+   "onsets": [
+    5500,
+    5500
+   ],
+   "leads": [
+    7000,
+    7500
+   ],
+   "false_alarms": []
+  },
+  "W1_hoyer|10000|2": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_hoyer|10000|3": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "W1_hoyer|10000|4": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  },
+  "grad_norm|2500|2": {
+   "onsets": [
+    3000,
+    3000
+   ],
+   "leads": [
+    9500,
+    10000
+   ],
+   "false_alarms": []
+  },
+  "grad_norm|2500|3": {
+   "onsets": [
+    3500,
+    3500
+   ],
+   "leads": [
+    9000,
+    9500
+   ],
+   "false_alarms": []
+  },
+  "grad_norm|2500|4": {
+   "onsets": [
+    4000,
+    4000
+   ],
+   "leads": [
+    8500,
+    9000
+   ],
+   "false_alarms": []
+  },
+  "grad_norm|5000|2": {
+   "onsets": [
+    5000,
+    9000
+   ],
+   "leads": [
+    7500,
+    4000
+   ],
+   "false_alarms": []
+  },
+  "grad_norm|5000|3": {
+   "onsets": [
+    10000,
+    10500
+   ],
+   "leads": [
+    2500,
+    2500
+   ],
+   "false_alarms": []
+  },
+  "grad_norm|5000|4": {
+   "onsets": [
+    11500,
+    11500
+   ],
+   "leads": [
+    1000,
+    1500
+   ],
+   "false_alarms": []
+  },
+  "grad_norm|10000|2": {
+   "onsets": [
+    11000,
+    11000
+   ],
+   "leads": [
+    1500,
+    2000
+   ],
+   "false_alarms": []
+  },
+  "grad_norm|10000|3": {
+   "onsets": [
+    13000,
+    12500
+   ],
+   "leads": [
+    -500,
+    500
+   ],
+   "false_alarms": []
+  },
+  "grad_norm|10000|4": {
+   "onsets": [
+    null,
+    null
+   ],
+   "leads": [
+    null,
+    null
+   ],
+   "false_alarms": []
+  }
+ },
+ "causal_dims": {
+  "0.9": [
+   47,
+   54
+  ],
+  "0.95": [
+   55,
+   58
+  ],
+  "0.99": [
+   63,
+   65
+  ],
+  "0.999": [
+   74,
+   73
+  ]
+ },
+ "controls": {
+  "top": [
+   0.9908437132835388,
+   0.9908437132835388
+  ],
+  "bottom": [
+   0.03989535570144653,
+   0.023217789828777313
+  ],
+  "rand_subset": [
+   0.7043492555618286,
+   0.7404676258563996
+  ],
+  "rand_subspace": [
+   0.5317854881286621,
+   0.5552648842334748
+  ]
+ },
+ "complement": {
+  "keep_C": [
+   0.9908437132835388,
+   0.9908437132835388
+  ],
+  "keep_Cperp": [
+   0.053956832736730576,
+   0.015369522385299206
+  ],
+  "noise": {
+   "C|0.1": [
+    1.0,
+    1.0
+   ],
+   "C|0.3": [
+    1.0,
+    1.0
+   ],
+   "C|1.0": [
+    0.7082406759262085,
+    0.6745585441589356
+   ],
+   "C|3.0": [
+    0.03404185697436333,
+    0.03289731852710247
+   ],
+   "Cperp|0.1": [
+    1.0,
+    1.0
+   ],
+   "Cperp|0.3": [
+    1.0,
+    1.0
+   ],
+   "Cperp|1.0": [
+    0.49934598207473757,
+    0.4870503664016724
+   ],
+   "Cperp|3.0": [
+    0.031687377393245696,
+    0.03204708956182003
+   ]
+  }
+ },
+ "stability": {
+  "0": {
+   "left": [
+    0.648034930229187,
+    0.6359091997146606
+   ],
+   "right": [
+    0.5160583257675171,
+    0.5141860842704773
+   ]
+  },
+  "2500": {
+   "left": [
+    0.6499799489974976,
+    0.6466922163963318
+   ],
+   "right": [
+    0.5316972732543945,
+    0.5267218947410583
+   ]
+  },
+  "5000": {
+   "left": [
+    0.6687338352203369,
+    0.664717972278595
+   ],
+   "right": [
+    0.5629959106445312,
+    0.5539366006851196
+   ]
+  },
+  "7500": {
+   "left": [
+    0.6916542053222656,
+    0.6925612688064575
+   ],
+   "right": [
+    0.6128139495849609,
+    0.60355144739151
+   ]
+  },
+  "8000": {
+   "left": [
+    0.6991488933563232,
+    0.6991039514541626
+   ],
+   "right": [
+    0.6276642084121704,
+    0.6175262928009033
+   ]
+  },
+  "9000": {
+   "left": [
+    0.7128186225891113,
+    0.7150363922119141
+   ],
+   "right": [
+    0.6531947255134583,
+    0.6472312808036804
+   ]
+  },
+  "10000": {
+   "left": [
+    0.7344124913215637,
+    0.7394629716873169
+   ],
+   "right": [
+    0.6863871812820435,
+    0.6822025775909424
+   ]
+  },
+  "11000": {
+   "left": [
+    0.7655572891235352,
+    0.7667651772499084
+   ],
+   "right": [
+    0.7273504137992859,
+    0.7239387035369873
+   ]
+  },
+  "12500": {
+   "left": [
+    0.8194336891174316,
+    0.8139464855194092
+   ],
+   "right": [
+    0.7926652431488037,
+    0.7862116098403931
+   ]
+  },
+  "15000": {
+   "left": [
+    0.902758002281189,
+    0.9027062058448792
+   ],
+   "right": [
+    0.889618992805481,
+    0.8916994333267212
+   ]
+  }
+ },
+ "overlap": {
+  "weight": [
+   0.465398907661438
+  ],
+  "fourier": [
+   2.1674185221466454e-15
+  ],
+  "fourier_original": [
+   0.30034513676831087
+  ],
+  "jaccard": [
+   0.0
+  ],
+  "shared": [
+   7
+  ],
+  "rand_weight": [
+   0.4870384539759319,
+   0.00487124513054325
+  ],
+  "rand_fourier": [
+   0.27032683953967795,
+   0.018209632835263785
+  ],
+  "rand_shared": 1.3833333333333333,
+  "key_freqs": {
+   "0": [
+    6,
+    7,
+    19,
+    21,
+    36
+   ],
+   "1": [
+    13,
+    25,
+    29,
+    32,
+    41
+   ]
+  }
+ },
+ "transplant": {
+  "grokked -> grokked (other seed)": [
+   [
+    0.008829300291836262,
+    0.9964028596878052
+   ],
+   [
+    0.008338783867657185,
+    0.998691976070404
+   ]
+  ],
+  "grokked -> same seed, memorization-phase checkpoint": [
+   [
+    0.9522563815116882,
+    0.9931327700614929
+   ],
+   [
+    0.9179202318191528,
+    0.9921517372131348
+   ]
+  ],
+  "memorization-phase checkpoint -> grokked": [
+   [
+    0.6576193571090698,
+    0.4722040593624115
+   ],
+   [
+    0.5248528718948364,
+    0.3317527770996094
+   ]
+  ]
+ },
+ "variants": {}
+}

@@ -1,0 +1,24 @@
+H1 (pre-registered): steepest ER(W_in) decrease after step 4,000 minus t_g > 0
+held-out seeds found: [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+
+  seed 15: t_g=  7000  t_s=  7500  t_s - t_g=  +500
+  seed 16: t_g= 12500  t_s= 13500  t_s - t_g= +1000
+  seed 17: t_g=  7500  t_s=  8250  t_s - t_g=  +750
+  seed 18: t_g= 17000  t_s= 18000  t_s - t_g= +1000
+  seed 19: t_g=  7500  t_s=  8250  t_s - t_g=  +750
+  seed 20: t_g= 17500  t_s= 18000  t_s - t_g=  +500
+  seed 21: t_g=  8000  t_s=  8000  t_s - t_g=    +0
+  seed 22: t_g= 13000  t_s= 14000  t_s - t_g= +1000
+  seed 23: t_g= 16500  t_s= 18250  t_s - t_g= +1750
+  seed 24: t_g= 10250  t_s= 12250  t_s - t_g= +2000
+  seed 25: t_g= 17750  t_s= 18000  t_s - t_g=  +250
+  seed 26: t_g=  8750  t_s=  9250  t_s - t_g=  +500
+  seed 27: t_g= 15750  t_s= 16500  t_s - t_g=  +750
+  seed 28: t_g=  8500  t_s=  9250  t_s - t_g=  +750
+  seed 29: t_g=  8250  t_s=  9500  t_s - t_g= +1250
+
+t_s - t_g: 850 ± 524 (n=15, median 750);  95% CI [560, 1140]
+one-sided one-sample t-test: t=6.28, p=1.02e-05
+t_s > t_g in 14/15 seeds; exact sign test p=4.88e-04
+H1 SUPPORTED at alpha = 0.05
+(seeds 0-14, which defined the measure: +964 +- 499 steps, 13/14 after t_g)

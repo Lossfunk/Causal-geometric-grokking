@@ -11,6 +11,7 @@ Examples
   python run_mlp.py --exp loss_ce --seeds 0-4        # M5  cross-entropy instead of MSE
   python run_mlp.py --exp wd_0 --seeds 0-4           # M6  weight-decay sweep
   python run_mlp.py --exp act_relu --seeds 0-4       # M7  activation comparison
+  python run_mlp.py --exp cont_sgd                   # late-phase mechanics (after "main"); see analyze_mechanics.py
 
   python run_mlp.py --list                 # print every (exp, seed) job, one per line
   python run_mlp.py --job-index 17         # run job #17 of that list (Slurm arrays)
@@ -23,7 +24,7 @@ import time
 
 import torch
 
-from common_mlp import DEFAULTS, train_run
+from common_mlp import CKPT_STEPS, DEFAULTS, train_run
 
 # experiment name -> (config overrides, default seeds)
 EXPERIMENTS = {
@@ -49,6 +50,45 @@ for tag, task in [("mul", {"op": "mul"}), ("p113", {"p": 113})]:
     EXPERIMENTS[f"{tag}_main"] = (dict(task), range(15))
     for r in [128, 64, 32]:                         # factorised control (128) and two rank limits
         EXPERIMENTS[f"{tag}_rank_{r}"] = ({**task, "rank": r}, range(3))
+# Learning mechanics of the late phase (analyze_mechanics.py). Appended last so earlier
+# job indices stay unchanged. Every run now also logs the radial forces on the weight norm.
+# (1) Continue main seeds 0-2 from step 20,000 (after grokking) to step 100,000 with
+#     different optimizers; needs results/mlp/main/seed<k>.pt.
+CONT = {"init_exp": "main", "init_step": 20_000, "steps": 80_000}
+EXPERIMENTS["cont_adamw"] = (dict(CONT), range(3))                         # control
+EXPERIMENTS["cont_sgd"] = ({**CONT, "optimizer": "sgd"}, range(3))          # same decay, raw gradient
+EXPERIMENTS["cont_adamw_wd0"] = ({**CONT, "wd": 0.0}, range(3))            # no decay
+EXPERIMENTS["cont_sgd_lr1_wd0"] = ({**CONT, "optimizer": "sgd", "lr": 1.0, "wd": 0.0}, range(3))
+# (2) Repeat three weight decays with force logging (otherwise identical to main / wd_*).
+for wd in [0.0, 1e-2, 1e-1]:
+    EXPERIMENTS[f"forces_wd{wd:g}"] = ({"wd": wd}, range(3))
+# (3) Ten times longer: does the norm settle at an equilibrium that depends on wd?
+EXPERIMENTS["long_mse"] = ({"steps": 1_000_000}, range(3))
+EXPERIMENTS["long_mse_wd0.03"] = ({"steps": 1_000_000, "wd": 3e-2}, range(3))
+EXPERIMENTS["long_ce_lr0.01"] = ({"steps": 1_000_000, "loss": "ce", "lr": 1e-2}, range(3))
+# Revision (analyze_revision.py G, analyze_mechanics.py A). Appended last so earlier job
+# indices stay unchanged.
+# (4) Fine logging (every 50 steps) of the factorised runs and of the unfactorised runs they
+#     are compared with; same seeds as rank_* / main, so the trajectories are the same runs.
+FINE = {"log_every": 50}
+for tag, task, steps in [("", {}, 16_000), ("mul_", {"op": "mul"}, 16_000), ("p113_", {"p": 113}, 20_000)]:
+    EXPERIMENTS[f"fine_{tag}main"] = ({**FINE, **task, "steps": steps}, range(3))
+    EXPERIMENTS[f"fine_{tag}rank_128"] = ({**FINE, **task, "rank": 128, "steps": 8_000}, range(3))
+for r in [64, 32]:
+    EXPERIMENTS[f"fine_rank_{r}"] = ({**FINE, "rank": r, "steps": 8_000}, range(3))
+# (5) Stage 4 under other optimizers, continued from step 20,000 of main seeds 0-2.
+#     The weight decay is set so that the per-step shrinkage matches AdamW's lr * wd = 1e-5:
+#     wd = 1e-5 / lr for gradient descent, wd = 1e-6 / lr for momentum 0.9 (steady-state
+#     step lr / (1 - momentum)). The learning rates are a sweep; the analysis reports which train.
+#     In Stage 4 most coordinates have sqrt(v) below Adam's eps = 1e-8, where AdamW acts like
+#     gradient descent with learning rate lr / eps = 1e5, so the sweep reaches that far.
+for lr in [1e2, 1e3, 1e4, 1e5, 1e6]:
+    EXPERIMENTS[f"cont_gd_lr{lr:g}"] = ({**CONT, "optimizer": "sgd", "lr": lr, "wd": 1e-5 / lr}, range(3))
+for lr in [1e1, 1e2, 1e3, 1e4, 1e5]:
+    EXPERIMENTS[f"cont_sgdm_lr{lr:g}"] = ({**CONT, "optimizer": "sgd", "momentum": 0.9, "lr": lr,
+                                          "wd": 1e-6 / lr}, range(3))
+for eps in [1e-10, 1e-9, 1e-7, 1e-6, 1e-4]:          # does Stage 4 depend on Adam's epsilon?
+    EXPERIMENTS[f"cont_adamw_eps{eps:g}"] = ({**CONT, "eps": eps}, range(3))
 
 
 def parse_seeds(s):
@@ -73,6 +113,14 @@ def run_one(name, seed, args, device):
         cfg["steps"] = args.steps
     if args.log_every:
         cfg["log_every"] = args.log_every
+    if args.init_step is not None and "init_exp" in cfg:
+        cfg["init_step"] = args.init_step
+    if "init_exp" in cfg:                           # continue a saved run of the same seed
+        cfg["init_ckpt"] = os.path.join(args.out, "mlp", cfg.pop("init_exp"), f"seed{seed}.pt")
+        if not os.path.exists(cfg["init_ckpt"]):
+            raise SystemExit(f"{name} needs {cfg['init_ckpt']}; run that experiment first")
+    steps = cfg.get("steps", DEFAULTS["steps"])
+    ckpt_steps = CKPT_STEPS + list(range(100_000, cfg.get("init_step", 0) + steps, 100_000))
     path = os.path.join(args.out, "mlp", name, f"seed{seed}.pt")
     if os.path.exists(path) and not args.overwrite:
         print(f"[skip] {path} exists")
@@ -80,7 +128,7 @@ def run_one(name, seed, args, device):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     print(f"[run] exp={name} seed={seed} cfg={ {**DEFAULTS, **cfg} }", flush=True)
     t0 = time.time()
-    run = train_run(seed, cfg, device=device)
+    run = train_run(seed, cfg, device=device, ckpt_steps=ckpt_steps)
     run["exp"] = name
     torch.save(run, path)
     h = run["hist"]
@@ -95,6 +143,8 @@ def main():
                     help="e.g. 0-14 or 0,3,5 (default: the experiment's standard seeds)")
     ap.add_argument("--steps", type=int, default=None, help="override (smoke tests)")
     ap.add_argument("--log-every", type=int, default=None, help="override (smoke tests)")
+    ap.add_argument("--init-step", type=int, default=None,
+                    help="override the checkpoint that cont_* runs start from (smoke tests)")
     ap.add_argument("--out", default="results")
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     ap.add_argument("--overwrite", action="store_true")

@@ -3,17 +3,22 @@ smoke_*/
 *.log
 logs/
 
-# training runs and analysis outputs (regenerate them with the scripts)
-results*/
-analysis_*/
+# raw runs and checkpoints (archived on Zenodo)
 *.pt
+results/*
+results_holdout/*
+results_dense/
+!results/analysis_mlp/
+!results/analysis_transformer/
+!results/analysis_revision/
+!results/analysis_mechanics/
+!results/analysis_mul/
+!results/analysis_p113/
+!results_holdout/prereg_H1/
 
-# pre-registered experiments for the next version of the paper (added later)
-PREREGISTRATION.md
-prereg_transformer_timing.py
-analyze_task.py
+# not part of this paper
+continual_mlp.py
 
 # Python
 __pycache__/
-*.pyc
-slurm-*.out
+*.pyctest_*/

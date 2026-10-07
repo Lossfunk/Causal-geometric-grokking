@@ -1,0 +1,404 @@
+{
+ "spectra": {
+  "W_E": {
+   "var95": [
+    44
+   ],
+   "var99": [
+    68
+   ],
+   "sv95": [
+    73
+   ],
+   "sv99": [
+    90
+   ]
+  },
+  "W_Q": {
+   "var95": [
+    4
+   ],
+   "var99": [
+    20
+   ],
+   "sv95": [
+    27
+   ],
+   "sv99": [
+    31
+   ]
+  },
+  "W_K": {
+   "var95": [
+    19
+   ],
+   "var99": [
+    29
+   ],
+   "sv95": [
+    29
+   ],
+   "sv99": [
+    32
+   ]
+  },
+  "W_V": {
+   "var95": [
+    28
+   ],
+   "var99": [
+    32
+   ],
+   "sv95": [
+    30
+   ],
+   "sv99": [
+    32
+   ]
+  },
+  "W_O": {
+   "var95": [
+    48
+   ],
+   "var99": [
+    76
+   ],
+   "sv95": [
+    86
+   ],
+   "sv99": [
+    109
+   ]
+  },
+  "W_in": {
+   "var95": [
+    62
+   ],
+   "var99": [
+    105
+   ],
+   "sv95": [
+    107
+   ],
+   "sv99": [
+    124
+   ]
+  },
+  "W_out": {
+   "var95": [
+    74
+   ],
+   "var99": [
+    108
+   ],
+   "sv95": [
+    107
+   ],
+   "sv99": [
+    124
+   ]
+  },
+  "W_U": {
+   "var95": [
+    61
+   ],
+   "var99": [
+    80
+   ],
+   "sv95": [
+    80
+   ],
+   "sv99": [
+    92
+   ]
+  },
+  "MLP post-act": {
+   "var95": [
+    113
+   ],
+   "var99": [
+    288
+   ],
+   "sv95": [],
+   "sv99": []
+  }
+ },
+ "d_c": {
+  "W_E": [
+   40
+  ],
+  "W_Q": [
+   1
+  ],
+  "W_K": [
+   1
+  ],
+  "W_V": [
+   30
+  ],
+  "W_O": [
+   19
+  ],
+  "W_in": [
+   18
+  ],
+  "W_out": [
+   70
+  ],
+  "W_U": [
+   65
+  ],
+  "MLP post-act": [
+   312
+  ]
+ },
+ "controls": {
+  "W_E": {
+   "top": [
+    0.02763018012046814
+   ],
+   "bottom": [
+    0.010171550326049328
+   ],
+   "rand_subset": [
+    0.007955063041299582
+   ],
+   "rand_subspace": [
+    0.007150447880849242
+   ]
+  },
+  "W_U": {
+   "top": [
+    0.028541065752506256
+   ],
+   "bottom": [
+    0.009564293548464775
+   ],
+   "rand_subset": [
+    0.019735843315720557
+   ],
+   "rand_subspace": [
+    0.018081068806350232
+   ]
+  },
+  "W_in": {
+   "top": [
+    0.028541065752506256
+   ],
+   "bottom": [
+    0.004858053755015135
+   ],
+   "rand_subset": [
+    0.006679823994636536
+   ],
+   "rand_subspace": [
+    0.007909518759697675
+   ]
+  },
+  "W_out": {
+   "top": [
+    0.027933809906244278
+   ],
+   "bottom": [
+    0.0069834524765610695
+   ],
+   "rand_subset": [
+    0.016517382860183717
+   ],
+   "rand_subspace": [
+    0.009579474758356809
+   ]
+  }
+ },
+ "alignment": {
+  "k = d_c(W_in)": {
+   "read_write": [
+    0.3971162438392639
+   ],
+   "read_key": [
+    0.36785287367615055
+   ],
+   "write_key": [
+    0.3536962380231216
+   ],
+   "random": [
+    0.32064454705739087,
+    0.012118437079832636
+   ]
+  },
+  "k = 11": {
+   "read_write": [
+    0.28674405813217163
+   ],
+   "read_key": [
+    0.2686110101285525
+   ],
+   "write_key": [
+    0.24692019953058633
+   ],
+   "random": [
+    0.24793445887102958,
+    0.01653855053382877
+   ]
+  }
+ },
+ "timing": [
+  {
+   "seed": 0,
+   "tg": null,
+   "tc": null,
+   "lag": null
+  }
+ ],
+ "ipr_sensitivity": {
+  "W_in_spectral_ipr|2500|2": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "W_in_spectral_ipr|2500|3": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "W_in_spectral_ipr|2500|4": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "W_in_spectral_ipr|5000|2": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "W_in_spectral_ipr|5000|3": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "W_in_spectral_ipr|5000|4": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "W_in_spectral_ipr|10000|2": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "W_in_spectral_ipr|10000|3": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "W_in_spectral_ipr|10000|4": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "E_fourier_ipr|2500|2": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "E_fourier_ipr|2500|3": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "E_fourier_ipr|2500|4": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "E_fourier_ipr|5000|2": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "E_fourier_ipr|5000|3": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "E_fourier_ipr|5000|4": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "E_fourier_ipr|10000|2": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "E_fourier_ipr|10000|3": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  },
+  "E_fourier_ipr|10000|4": {
+   "onsets": [
+    null
+   ],
+   "leads": [
+    null
+   ]
+  }
+ },
+ "patching": {
+  "corrupted": 0.012600576505064964,
+  "pre patched": 0.028541065752506256,
+  "post patched": 0.028541065752506256
+ }
+}

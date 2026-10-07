@@ -185,7 +185,26 @@ def section_onsets(R, runs):
         R.p(f"  steepest ER(W1) decrease (smoothed, from step 1,000) minus t_g: {fmt(sl, 0)}, median "
             f"{np.median(sl):.0f};  after t_g in {(sl > 0).sum()}/{len(sl)};  one-sided t={t:.2f}, p={pv:.1e}"
             f"  (same measure in analyze_transformer.py section E)")
+    R.p("\n  accuracy and effective rank before t_g (Stages 1 and 2)")
+    R.p(f"  {'step':>7} {'train acc %':>22} {'test acc %':>22} {'ER(W1)':>22}")
+    pre = {}
+    for s0 in (1000, 4000, 6000, 7000, 8000, 9000, 10000, 11000, 12000):
+        v = {k: [] for k in ("train", "test", "er")}
+        for r in runs:
+            st = list(r["hist"]["steps"])
+            if s0 in st:
+                i = st.index(s0)
+                v["train"].append(100 * r["hist"]["train_acc"][i])
+                v["test"].append(100 * r["hist"]["test_acc"][i])
+                v["er"].append(r["hist"]["W1_erank"][i])
+        pre[s0] = v
+        R.p(f"  {s0:>7} {fmt(v['train'], 2):>22} {fmt(v['test'], 2):>22} {fmt(v['er'], 2):>22}")
+    for thr in (0.90, 0.99, 0.999):
+        first = [next((int(s0) for s0, a in zip(r["hist"]["steps"], r["hist"]["train_acc"]) if a >= thr), None)
+                 for r in runs]
+        R.p(f"  first step with train acc >= {100 * thr:g}%: {fmt(first, 0)}")
     R.data["onsets"] = rows
+    R.data["before_tg"] = {str(k): v for k, v in pre.items()}
     return rows
 
 
@@ -403,6 +422,7 @@ def d_at(ks, accs, orig, tau):
 def section_causal_dims(R, runs, out):
     R.h("E. Causal dimensionality of W1 (App. B, Fig. 3a), controls (Table 2), complement tests")
     curves, dims = [], {t: [] for t in THRESHOLDS}
+    kvar = {0.95: [], 0.99: []}
     ctrl = {"top": [], "bottom": [], "rand_subset": [], "rand_subspace": []}
     comp = {"keep_C": [], "keep_Cperp": []}
     noise_scales = (0.1, 0.3, 1.0, 3.0)
@@ -413,6 +433,9 @@ def section_causal_dims(R, runs, out):
         Xte, yte = X[te], y[te]
         ks, accs, orig, (U, S, Vh) = topk_curve(model, Xte, yte)
         curves.append(accs)
+        cum = torch.cumsum(S ** 2, 0) / (S ** 2).sum()
+        for q in kvar:
+            kvar[q].append(int((cum < q).sum()) + 1)
         for t in THRESHOLDS:
             dims[t].append(d_at(ks, accs, orig, t))
         k = dims[0.99][-1]
@@ -453,6 +476,8 @@ def section_causal_dims(R, runs, out):
     R.p("  App. B -- d_tau = smallest k whose top-k truncation keeps >= tau x clean accuracy")
     for t in THRESHOLDS:
         R.p(f"    tau={t:<6} d = {fmt(dims[t], 1)}")
+    R.p(f"  variance counts of W1 (directions carrying 95% / 99% of sum sigma^2): "
+        f"k95 = {fmt(kvar[0.95], 1)}, k99 = {fmt(kvar[0.99], 1)}")
     R.p("\n  Table 2 (MLP row) -- truncations of W1 at k = d_0.99 (per seed), test accuracy")
     for key, lab in [("top", "top-k"), ("bottom", "bottom-k"),
                      ("rand_subset", "random k of the singular directions (10 draws)"),
@@ -466,6 +491,7 @@ def section_causal_dims(R, runs, out):
         R.p(f"      s={s:<4}  in C: {fmt([100 * v for v in noise[('C', s)]], 2)} %   "
             f"in C-perp: {fmt([100 * v for v in noise[('Cperp', s)]], 2)} %")
     R.data["causal_dims"] = {str(t): dims[t] for t in THRESHOLDS}
+    R.data["variance_counts"] = {str(q): v for q, v in kvar.items()}
     R.data["controls"] = ctrl
     R.data["complement"] = dict(comp, noise={f"{a}|{b}": v for (a, b), v in noise.items()})
 
@@ -527,6 +553,58 @@ def section_dc_over_training(R, runs, out):
     savefig(out, "fig_dc_over_training.png")
 
 
+# ================================================================ E4. margin-free d
+def truncation_criteria(model, W1, X, y):
+    """Top-k truncations of W1 judged by four criteria: 99% of the test accuracy (as d_0.99),
+    test MSE at most 1% above the clean value, and outputs within 10% / 5% of the clean
+    outputs (relative Frobenius norm). The last three do not depend on the margin."""
+    U, S, Vh = torch.linalg.svd(W1, full_matrices=False)
+    Y = torch.nn.functional.one_hot(y, P).float()
+    f0 = model.readout(model.act((W1 @ X.T).T / np.sqrt(X.shape[1])))
+    acc0, mse0, n0 = accuracy(f0, y), float(((f0 - Y) ** 2).mean()), float(f0.norm())
+    fc = f0.gather(1, y[:, None]).squeeze(1)
+    rest = f0.clone()
+    rest.scatter_(1, y[:, None], -float("inf"))
+    margin = float((fc - rest.max(1).values).median())
+    d = dict(d_acc=None, d_mse=None, d_out10=None, d_out05=None)
+    for k in range(1, len(S) + 1):
+        fk = model.readout(model.act((((U[:, :k] * S[:k]) @ Vh[:k]) @ X.T).T / np.sqrt(X.shape[1])))
+        rel = float((fk - f0).norm()) / n0
+        for key, ok in (("d_acc", accuracy(fk, y) >= 0.99 * acc0),
+                        ("d_mse", float(((fk - Y) ** 2).mean()) <= 1.01 * mse0),
+                        ("d_out10", rel <= 0.10), ("d_out05", rel <= 0.05)):
+            if d[key] is None and ok:
+                d[key] = k
+        if all(v is not None for v in d.values()):
+            break
+    return d, 100 * acc0, margin
+
+
+def section_margin_free(R, runs):
+    R.h("E4. Is the narrowing of d_0.99 a margin effect? Margin-free criteria over training")
+    R.p("  d by criterion: 99% of test accuracy (d_0.99, margin-dependent); test MSE <= 1.01 x clean;")
+    R.p("  outputs within 10% / 5% of the clean outputs (relative Frobenius norm); test set, main runs")
+    cols = [("test_acc", "test acc %", 1), ("margin", "median margin", 3), ("d_acc", "d (99% acc)", 1),
+            ("d_mse", "d (MSE +1%)", 1), ("d_out10", "d (outputs 10%)", 1), ("d_out05", "d (outputs 5%)", 1)]
+    rows = {}
+    for r in runs:
+        X, y, _, te = run_data(r)
+        for s, w in sorted(r["ckpts"].items()):
+            if s < 10000:
+                continue
+            m = model_from_weights(w["W1"], w["W2"], r["config"]["act"])
+            d, acc, margin = truncation_criteria(m, w["W1"].float(), X[te], y[te])
+            row = rows.setdefault(s, {k: [] for k, _, _ in cols})
+            row["test_acc"].append(acc)
+            row["margin"].append(margin)
+            for k, v in d.items():
+                row[k].append(v)
+    R.p("  " + f"{'step':>7}" + "".join(f"{lab:>24}" for _, lab, _ in cols))
+    for s in sorted(rows):
+        R.p("  " + f"{s:>7}" + "".join(f"{fmt(rows[s][k], nd):>24}" for k, _, nd in cols))
+    R.data["margin_free"] = {str(s): v for s, v in rows.items()}
+
+
 # ================================================================ E3. Stage-4 widening
 def _margins(f, y):
     """Correct-class output and its margin over the largest other output."""
@@ -554,6 +632,15 @@ def widening_stats(r, s, K):
     m = model_from_weights(w["W1"], w["W2"], r["config"]["act"])
     ks, accs, orig, (U, S, Vh) = topk_curve(m, Xte, yte)
     margin, fc = _margins(m(Xte), yte)
+    # gradient-flow forces on ||theta||^2 (MSE, quadratic MLP: homogeneous of degree 3):
+    # loss push = -<theta, grad L> = (2 * 3 / (N p)) sum (y - f) . f  over training inputs,
+    # weight-decay pull = wd * ||theta||^2
+    Xtr, ytr = X[r["train_idx"]], y[r["train_idx"]]
+    ftr = m(Xtr)
+    Ytr = torch.nn.functional.one_hot(ytr, P).float()
+    push = 6.0 / (Xtr.shape[0] * P) * float(((Ytr - ftr) * ftr).sum())
+    pull = r["config"]["wd"] * float(w["W1"].pow(2).sum() + w["W2"].pow(2).sum())
+    _, f90, f99 = freq_usage(w["W1"].numpy()[:, :P])
     h = m.pre(Xte)
     h_top = h @ (U[:, :K] @ U[:, :K].T)
     h_rest = h - h_top
@@ -561,6 +648,7 @@ def widening_stats(r, s, K):
                 W1=float(w["W1"].norm()), W2=float(w["W2"].norm()), s1=float(S[0]),
                 top=float(S[:K].pow(2).sum().sqrt()), rest=float(S[K:].pow(2).sum().sqrt()),
                 accK=100 * float(accs[K - 1]), test=100 * float(orig),
+                push=push, pull=pull, f90=f90, f99=f99,
                 fc=float(fc.median()), margin=float(margin.median()),
                 cross=float(m.readout(2 * h_top * h_rest).norm(dim=1).median()),
                 square=float(m.readout(h_rest * h_rest).norm(dim=1).median()))
@@ -597,10 +685,15 @@ def section_stage4_widening(R, root, main, out):
     R.p(f"  {'':<34}" + "".join(f"{s:>18}" for s in steps))
     for key, lab, nd in rows:
         R.p(f"  {lab:<34}" + "".join(f"{ms([d[key] for d in main_stats[s]], nd):>18}" for s in steps))
+    sci = lambda key: "".join(f"{np.mean([d[key] for d in main_stats[s]]):>18.2e}" for s in steps)
+    R.p(f"  {'loss push on ||theta||^2 (GD terms)':<34}" + sci("push"))
+    R.p(f"  {'weight-decay pull wd*||theta||^2':<34}" + sci("pull"))
+    R.p("  (gradient-flow terms; under plain gradient descent the norm grows only if push > pull,")
+    R.p("   so growth with push << pull comes from AdamW's normalised updates)")
 
     R.p("\n  [weight decay: step 20,000 -> final checkpoint]")
     R.p(f"  {'weight decay':<14} {'n':>2} {'d_0.99':>14} {'ER(W1)':>16} {'||W1||_F':>16} "
-        f"{'sigma_1':>14} {f'size beyond {K}':>16} {'final test %':>13}")
+        f"{'sigma_1':>14} {f'size beyond {K}':>16} {'final test %':>13} {'#freq 90/99% (end)':>20}")
     base = [r for r in main if r["seed"] < 5]
     wd_stats = {}
     for name, e in [("0", "wd_0"), ("1e-3", "wd_0.001"), ("1e-2 (main)", None),
@@ -614,7 +707,8 @@ def section_stage4_widening(R, root, main, out):
         arrow = lambda key, nd: (f"{mstd([d[key] for d in a])[0]:.{nd}f} -> "
                                  f"{mstd([d[key] for d in b])[0]:.{nd}f}")
         R.p(f"  {name:<14} {len(rs):>2} {arrow('d99', 1):>14} {arrow('er', 1):>16} {arrow('W1', 0):>16} "
-            f"{arrow('s1', 0):>14} {arrow('rest', 0):>16} {mstd([d['test'] for d in b])[0]:>13.1f}")
+            f"{arrow('s1', 0):>14} {arrow('rest', 0):>16} {mstd([d['test'] for d in b])[0]:>13.1f} "
+            f"{mstd([d['f90'] for d in b])[0]:>9.1f} / {mstd([d['f99'] for d in b])[0]:<8.1f}")
     R.data["stage4_widening"] = dict(K=K, main={str(s): v for s, v in main_stats.items()}, wd=wd_stats)
 
     fig, axs = plt.subplots(1, 2, figsize=(10, 3.6))
@@ -875,15 +969,21 @@ def section_transplant(R, runs, mem_runs):
         if not cand:
             continue
         w = r["ckpts"][max(cand)]
+        groups.setdefault("_memorization checkpoint (step, test acc)", []).append(
+            (max(cand), float(h["test_acc"][list(h["steps"]).index(max(cand))])))
         mM = model_from_weights(w["W1"], w["W2"], r["config"]["act"])
         mG = final_model(r)
         eval_pair(r, mG, mM, "", groups.setdefault("grokked -> same seed, memorization-phase checkpoint", []))
         eval_pair(r, mM, mG, "", groups.setdefault("memorization-phase checkpoint -> grokked", []))
     for name, vals in groups.items():
-        if vals:
+        if vals and not name.startswith("_"):
             R.p(f"  {name:<56} unaligned {fmt([100 * v[0] for v in vals], 2)} %   "
                 f"aligned {fmt([100 * v[1] for v in vals], 2)} %")
     R.p(f"  chance = {100 / P:.2f} %")
+    mem = groups.get("_memorization checkpoint (step, test acc)", [])
+    if mem:
+        R.p(f"  memorization-phase checkpoint = last checkpoint with train acc >= 99% and test acc <= 50%:")
+        R.p(f"    steps {sorted(set(v[0] for v in mem))}, test accuracy there {fmt([100 * v[1] for v in mem], 1)} %")
     R.data["transplant"] = groups
 
 
@@ -977,6 +1077,13 @@ def section_variants(R, root, main, out):
          "fig_rank_bottleneck.png")
     R.p("    'AB, rank 128' is factorised like the bottlenecks but has full rank: if it groks as early")
     R.p("    as rank 32-96, the speed-up comes from the factorisation, not from the rank limit.")
+    fac, unf = load_exp(root, "rank_128"), [r for r in main if r["seed"] < 3]
+    if fac and unf:
+        R.p("    effective rank of W1 before and after grokking: factorised r=128 vs unfactorised (seeds 0-2)")
+        R.p(f"    {'step':>7} {'AB, rank 128':>22} {'W1, full (main)':>22}")
+        er_at = lambda r, s0: float(np.asarray(r["hist"]["W1_erank"])[np.argmin(np.abs(np.asarray(r["hist"]["steps"]) - s0))])
+        for s0 in (0, 500, 1000, 1500, 2000, 3000, 5000, 10000, 20000):
+            R.p(f"    {s0:>7} {fmt([er_at(r, s0) for r in fac], 1):>22} {fmt([er_at(r, s0) for r in unf], 1):>22}")
     R.data["variants"] = data
 
 
@@ -1098,7 +1205,7 @@ def section_figures(R, run, out):
     else:
         bounds = [0, t2, tg, tc, int(st_a[-1])]
         names = ["Stage 1: Memorization", "Stage 2: Grokking transition",
-                 "Stage 3: Subspace crystallization", "Stage 4: Late compression"]
+                 "Stage 3: Consolidation", "Stage 4: Late compression"]
         R.p(f"  fig_rank_derivatives.png stage boundaries (seed {run['seed']}): "
             f"Stage 2 from {t2} (test acc > 5%), Stage 3 from t_g = {tg}, Stage 4 from t_c = {tc}")
         shades = ["#f7faff", "#eef4ff", "#e5eeff", "#dce8fb"]     # light, as in the original figure
@@ -1205,6 +1312,7 @@ def main():
     section_onset_sensitivity(R, main_runs, neg)
     dims = section_causal_dims(R, main_runs, out)
     section_dc_over_training(R, main_runs, out)
+    section_margin_free(R, main_runs)
     section_stage4_widening(R, args.runs, main_runs, out)
     section_stability(R, main_runs, dims)
     section_overlap(R, main_runs, out, dims)

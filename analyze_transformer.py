@@ -606,6 +606,83 @@ def section_dc_over_training(R, runs, device):
     R.data["dc_over_training"] = {str(s): v for s, v in rows.items()}
 
 
+def margin_free_curve(model, name, data, labels):
+    """Top-k truncations of one matrix judged by four criteria: 99% of test accuracy (as d_c),
+    cross-entropy at most 1% above the clean value, and final-position logits (centred per
+    input, since softmax ignores a constant shift) within 10% / 5% of the clean logits.
+    The last three do not depend on the margin. Also returns the median logit margin."""
+    ce = torch.nn.functional.cross_entropy
+    with torch.no_grad():
+        base = model(data)[:, -1, :]
+    base_c = base - base.mean(-1, keepdim=True)
+    acc0 = float((base.argmax(-1) == labels).float().mean())
+    ce0 = float(ce(base, labels))
+    rest = base.clone()
+    rest.scatter_(1, labels[:, None], -float("inf"))
+    margin = float((base.gather(1, labels[:, None]).squeeze(1) - rest.max(-1).values).median())
+    W0 = weight_matrices(model)[name].detach().clone()
+    n = int(torch.linalg.svdvals(as2d(W0).float()).shape[0])
+    ks = sorted(set(range(1, min(21, n + 1))) | set(range(25, n + 1, 5)) | {n})
+    d = dict(d_acc=None, d_ce=None, d_out10=None, d_out05=None)
+    for k in ks:
+        Wk, _ = truncated(W0, range(k))
+        set_weight(model, name, Wk)
+        with torch.no_grad():
+            lg = model(data)[:, -1, :]
+        rel = float(((lg - lg.mean(-1, keepdim=True)) - base_c).norm() / base_c.norm())
+        for key, ok in (("d_acc", float((lg.argmax(-1) == labels).float().mean()) >= 0.99 * acc0),
+                        ("d_ce", float(ce(lg, labels)) <= 1.01 * ce0),
+                        ("d_out10", rel <= 0.10), ("d_out05", rel <= 0.05)):
+            if d[key] is None and ok:
+                d[key] = k
+        if all(v is not None for v in d.values()):
+            break
+    set_weight(model, name, W0)
+    return d, 100 * acc0, margin
+
+
+def section_margin_free(R, runs, device):
+    R.h("L. Is d_c a margin effect? Margin-free criteria, each seed aligned at its own t_g")
+    R.p("  d by criterion: 99% of test accuracy (d_c, margin-dependent); cross-entropy <= 1.01 x clean;")
+    R.p("  centred final-position logits within 10% / 5% of the clean logits (relative Frobenius norm)")
+    R.p("  checkpoints per seed: the last one before t_g, the first one at or after t_g, and the final one")
+    mats = ("W_E", "W_in", "W_out", "W_U")
+    crit = (("d_acc", "d (99% acc)"), ("d_ce", "d (CE +1%)"), ("d_out10", "d (logits 10%)"),
+            ("d_out05", "d (logits 5%)"))
+    out = {}
+    for lab in ("last checkpoint before t_g", "first checkpoint at or after t_g", "final checkpoint"):
+        res = {"acc": [], "margin": [], **{f"{m}|{c}": [] for m in mats for c, _ in crit}}
+        for r in runs:
+            tg = t_grok(r["hist"])
+            steps = sorted(r["ckpts"])
+            if lab.startswith("last"):
+                cand = [s for s in steps if s < tg]
+                if not cand:
+                    continue
+                s = cand[-1]
+            elif lab.startswith("first"):
+                s = min(s for s in steps if s >= tg)
+            else:
+                s = r["final_step"]
+            model, data, labels, tr, te = restore(r, device, s)
+            first = True
+            for m in mats:
+                d, acc0, margin = margin_free_curve(model, m, data[te], labels[te])
+                if first:
+                    res["acc"].append(acc0)
+                    res["margin"].append(margin)
+                    first = False
+                for c, _ in crit:
+                    res[f"{m}|{c}"].append(d[c])
+        out[lab] = res
+        R.p(f"\n  [{lab}]  n={len(res['acc'])}  test acc {fmt(res['acc'], 1)} %  "
+            f"median logit margin {fmt(res['margin'], 2)}")
+        R.p(f"  {'matrix':<8}" + "".join(f"{h:>24}" for _, h in crit))
+        for m in mats:
+            R.p(f"  {m:<8}" + "".join(f"{fmt(res[f'{m}|{c}'], 1):>24}" for c, _ in crit))
+    R.data["margin_free"] = out
+
+
 def section_negatives(R, neg, device):
     R.h("N. Runs that did not grok within the step budget (negative controls)")
     if not neg:
@@ -659,6 +736,7 @@ def main():
     section_alignment_vs_wd(R, args.runs, args.device)
     section_freqs(R, runs, dc, args.device)
     section_dc_over_training(R, runs, args.device)
+    section_margin_free(R, runs, args.device)
     section_negatives(R, neg, args.device)
     R.save(out)
     print(f"\nwrote {out}/summary.txt, summary.json and figures")

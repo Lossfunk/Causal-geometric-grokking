@@ -1,0 +1,217 @@
+main runs: 2 seeds; config: {'p': 97, 'width': 128, 'alpha': 0.35, 'steps': 20000, 'lr': 0.001, 'wd': 0.01, 'log_every': 500, 'loss': 'mse', 'act': 'quadratic', 'rank': None, 'lam_nuc': 0.0, 'nuc_start': 0, 'labels': 'true', 'op': 'add'}
+
+============================================================================
+A. Onset times (Table 3) -- main runs
+============================================================================
+seed      t_g      t_c      lag    t_IPR  IPR lead
+   0    12500    19000     6500     5000      7500
+   1    13000    19000     6000     5000      8000
+  t_g (test acc >= 95%)            12750 ± 354 (n=2)   [ddof=0 sd: 250]
+  t_c (ER < 99% of running max)    19000 ± 0 (n=2)   [ddof=0 sd: 0]
+  lag t_c - t_g                    6250 ± 354 (n=2)   [ddof=0 sd: 250]
+  t_IPR (window 0-5000, 3 sd)      5000 ± 0 (n=2)   [ddof=0 sd: 0]
+  IPR lead t_g - t_IPR             7750 ± 354 (n=2)   [ddof=0 sd: 250]
+  seeds with t_c > t_g: 2/2   one-sided t-test: t=25.000, p=1.27e-02, standardized effect=17.68
+  mean lag as % of training: 31.2%
+
+============================================================================
+B. Cross-correlation of dER/dt and dAcc/dt (Fig. 7b)
+============================================================================
+  trough of mean curve at tau = +7500 steps
+  per-seed trough lags: 6500 ± 2121 (n=2)
+  max |C(tau)| for tau in [-80000, -5000]: 0.240
+
+============================================================================
+C. Granger-type test of predictive precedence (App. / Sec. 6.2)
+============================================================================
+
+  [first differences only (as in the paper)]  n=0
+    ADF p (dER): n/a;  stationary in 0/0 seeds
+    ADF p (dAcc): n/a;  stationary in 0/0 seeds
+    H0: compression -> grokking    mean F=nan  mean p=nan  median p=nan  rejected in 0/0
+    H0: grokking -> compression    mean F=nan  mean p=nan  median p=nan  rejected in 0/0
+
+  [differenced until ADF p < 0.05]  n=0
+    ADF p (dER): n/a;  stationary in 0/0 seeds
+    ADF p (dAcc): n/a;  stationary in 0/0 seeds
+    H0: compression -> grokking    mean F=nan  mean p=nan  median p=nan  rejected in 0/0
+    H0: grokking -> compression    mean F=nan  mean p=nan  median p=nan  rejected in 0/0
+
+============================================================================
+D. Label-free onset detection: windows x thresholds, all metrics (Sec. 6.1, Table 4)
+============================================================================
+  detected = seeds where the detector fires; early = fires before t_g;
+  false alarms = random-label runs (never generalize) where it fires.
+
+  metric=fourier_ipr (up)
+      window   k  detected   early  median lead  false alarms
+        2500   2     2/2     2/2          10250       0/0
+        2500   3     2/2     2/2          10250       0/0
+        2500   4     2/2     2/2          10250       0/0
+        5000   2     2/2     2/2           7750       0/0
+        5000   3     2/2     2/2           7750       0/0
+        5000   4     2/2     2/2           7500       0/0
+       10000   2     2/2     2/2           2750       0/0
+       10000   3     2/2     2/2           2750       0/0
+       10000   4     2/2     2/2           1750       0/0
+
+  metric=spectral_ipr (up)
+      window   k  detected   early  median lead  false alarms
+        2500   2     0/2     0/2            n/a       0/0
+        2500   3     0/2     0/2            n/a       0/0
+        2500   4     0/2     0/2            n/a       0/0
+        5000   2     0/2     0/2            n/a       0/0
+        5000   3     0/2     0/2            n/a       0/0
+        5000   4     0/2     0/2            n/a       0/0
+       10000   2     0/2     0/2            n/a       0/0
+       10000   3     0/2     0/2            n/a       0/0
+       10000   4     0/2     0/2            n/a       0/0
+
+  metric=W1_erank (down)
+      window   k  detected   early  median lead  false alarms
+        2500   2     0/2     0/2            n/a       0/0
+        2500   3     0/2     0/2            n/a       0/0
+        2500   4     0/2     0/2            n/a       0/0
+        5000   2     0/2     0/2            n/a       0/0
+        5000   3     0/2     0/2            n/a       0/0
+        5000   4     0/2     0/2            n/a       0/0
+       10000   2     0/2     0/2            n/a       0/0
+       10000   3     0/2     0/2            n/a       0/0
+       10000   4     0/2     0/2            n/a       0/0
+
+  metric=W1_srank (down)
+      window   k  detected   early  median lead  false alarms
+        2500   2     1/2     1/2          10500       0/0
+        2500   3     0/2     0/2            n/a       0/0
+        2500   4     0/2     0/2            n/a       0/0
+        5000   2     0/2     0/2            n/a       0/0
+        5000   3     0/2     0/2            n/a       0/0
+        5000   4     0/2     0/2            n/a       0/0
+       10000   2     0/2     0/2            n/a       0/0
+       10000   3     0/2     0/2            n/a       0/0
+       10000   4     0/2     0/2            n/a       0/0
+
+  metric=W1_l0 (both)
+      window   k  detected   early  median lead  false alarms
+        2500   2     2/2     2/2           8750       0/0
+        2500   3     2/2     2/2           6500       0/0
+        2500   4     1/2     1/2           8000       0/0
+        5000   2     2/2     2/2           5000       0/0
+        5000   3     0/2     0/2            n/a       0/0
+        5000   4     0/2     0/2            n/a       0/0
+       10000   2     0/2     0/2            n/a       0/0
+       10000   3     0/2     0/2            n/a       0/0
+       10000   4     0/2     0/2            n/a       0/0
+
+  metric=W1_hoyer (both)
+      window   k  detected   early  median lead  false alarms
+        2500   2     2/2     2/2           9250       0/0
+        2500   3     2/2     2/2           9250       0/0
+        2500   4     2/2     2/2           8750       0/0
+        5000   2     2/2     2/2           7750       0/0
+        5000   3     2/2     2/2           7750       0/0
+        5000   4     2/2     2/2           7250       0/0
+       10000   2     0/2     0/2            n/a       0/0
+       10000   3     0/2     0/2            n/a       0/0
+       10000   4     0/2     0/2            n/a       0/0
+
+  metric=grad_norm (both)
+      window   k  detected   early  median lead  false alarms
+        2500   2     2/2     2/2           9750       0/0
+        2500   3     2/2     2/2           9250       0/0
+        2500   4     2/2     2/2           8750       0/0
+        5000   2     2/2     2/2           5750       0/0
+        5000   3     2/2     2/2           2500       0/0
+        5000   4     2/2     2/2           1250       0/0
+       10000   2     2/2     2/2           1750       0/0
+       10000   3     2/2     1/2              0       0/0
+       10000   4     0/2     0/2            n/a       0/0
+
+============================================================================
+E. Causal dimensionality of W1 (App. B, Fig. 3a), controls (Table 2), complement tests
+============================================================================
+  App. B -- d_tau = smallest k whose top-k truncation keeps >= tau x clean accuracy
+    tau=0.9    d = 50.5 ± 4.9 (n=2)
+    tau=0.95   d = 56.5 ± 2.1 (n=2)
+    tau=0.99   d = 64.0 ± 1.4 (n=2)
+    tau=0.999  d = 73.5 ± 0.7 (n=2)
+
+  Table 2 (MLP row) -- truncations of W1 at k = d_0.99 (per seed), test accuracy
+    top-k                                            99.08 ± 0.00 (n=2) %
+    bottom-k                                         3.16 ± 1.18 (n=2) %
+    random k of the singular directions (10 draws)   72.24 ± 2.55 (n=2) %
+    random k-dim subspace of R^128 (10 draws)        54.35 ± 1.66 (n=2) %
+
+  Complement interventions on pre-activations h (C = top-d_0.99 left singular subspace)
+    keep only C      : 99.08 ± 0.00 (n=2) %
+    keep only C-perp : 3.47 ± 2.73 (n=2) %
+    noise of norm s*||h|| added inside C or inside C-perp:
+      s=0.1   in C: 100.00 ± 0.00 (n=2) %   in C-perp: 100.00 ± 0.00 (n=2) %
+      s=0.3   in C: 100.00 ± 0.00 (n=2) %   in C-perp: 100.00 ± 0.00 (n=2) %
+      s=1.0   in C: 69.14 ± 2.38 (n=2) %   in C-perp: 49.32 ± 0.87 (n=2) %
+      s=3.0   in C: 3.35 ± 0.08 (n=2) %   in C-perp: 3.19 ± 0.03 (n=2) %
+
+============================================================================
+F. Temporal stability of the sufficient subspace (App. C)
+============================================================================
+  k = 64 (median d_0.99);  mean t_g = 12750
+     step     hidden-space subspace (C)      input-space subspace
+        0           0.642 ± 0.009 (n=2)       0.515 ± 0.001 (n=2)
+     2500           0.648 ± 0.002 (n=2)       0.529 ± 0.004 (n=2)
+     5000           0.667 ± 0.003 (n=2)       0.558 ± 0.006 (n=2)
+     7500           0.692 ± 0.001 (n=2)       0.608 ± 0.007 (n=2)
+     8000           0.699 ± 0.000 (n=2)       0.623 ± 0.007 (n=2)
+     9000           0.714 ± 0.002 (n=2)       0.650 ± 0.004 (n=2)
+    10000           0.737 ± 0.004 (n=2)       0.684 ± 0.003 (n=2)
+    11000           0.766 ± 0.001 (n=2)       0.726 ± 0.002 (n=2)
+    12500           0.817 ± 0.004 (n=2)       0.789 ± 0.005 (n=2)
+    15000           0.903 ± 0.000 (n=2)       0.891 ± 0.001 (n=2)
+  random baseline     0.635 ± 0.005 (k in R^128)   0.505 ± 0.004 (k in R^194)
+
+============================================================================
+G. Cross-seed subspace overlap (Sec. 5)
+============================================================================
+  2 seeds, 1 pairs
+  key frequencies per seed (top 5, f and p-f merged):
+    seed  0: [6, 7, 19, 21, 36]   (DC share of power: 0.003)
+    seed  1: [13, 25, 29, 32, 41]   (DC share of power: 0.003)
+  weight-subspace overlap (top-60, input space): 0.465 ± 0.000 (n=1)   random: 0.487 ± 0.005
+  Fourier-subspace overlap (5 key freqs, 10 dims): 0.000 ± 0.000 (n=1)   random: 0.270 ± 0.018
+  [original construction, for comparison]: 0.300 ± 0.000 (n=1)
+  Jaccard overlap of key-frequency sets: 0.000 ± 0.000 (n=1)
+  shared directions (cos > 0.9 in top-60), per pair: 7.00 ± 0.00 (n=1)   random expectation: 1.38
+    shared direction 0 (seeds 0,1, cos=0.989): a: DC 0.00, f=41 0.90; b: DC 0.00, f=41 0.91
+    shared direction 1 (seeds 0,1, cos=0.979): a: DC 0.01, f=7 0.86; b: DC 0.00, f=7 0.88
+    shared direction 2 (seeds 0,1, cos=0.961): a: DC 0.00, f=15 0.68; b: DC 0.00, f=15 0.69
+    shared direction 3 (seeds 0,1, cos=0.937): a: DC 0.01, f=21 0.33; b: DC 0.00, f=21 0.28
+    shared direction 4 (seeds 0,1, cos=0.918): a: DC 0.00, f=26 0.26; b: DC 0.00, f=26 0.21
+    shared direction 5 (seeds 0,1, cos=0.918): a: DC 0.00, f=5 0.25; b: DC 0.00, f=20 0.38
+    shared direction 6 (seeds 0,1, cos=0.906): a: DC 0.00, f=25 0.54; b: DC 0.00, f=25 0.57
+
+============================================================================
+H. Activation patching sanity check (MLP, one seed)
+============================================================================
+  clean accuracy 100.00%
+  sigma=0.1: corrupted 71.99%  pre-patched 100.00%  post-patched 100.00%
+  sigma=0.3: corrupted 3.50%  pre-patched 100.00%  post-patched 100.00%
+  sigma=0.5: corrupted 1.49%  pre-patched 100.00%  post-patched 100.00%
+  (with one hidden layer, patching the whole pre- or post-activation restores the clean output by construction)
+
+============================================================================
+I. Transplant patching with and without Procrustes alignment (App. D)
+============================================================================
+  fit the rotation on model A's training inputs, evaluate on A's test inputs,
+  against the true (a+b) mod p labels.
+  grokked -> grokked (other seed)                          unaligned 0.86 ± 0.03 (n=2) %   aligned 99.75 ± 0.16 (n=2) %
+  grokked -> same seed, memorization-phase checkpoint      unaligned 93.51 ± 2.43 (n=2) %   aligned 99.26 ± 0.07 (n=2) %
+  memorization-phase checkpoint -> grokked                 unaligned 59.12 ± 9.39 (n=2) %   aligned 40.20 ± 9.93 (n=2) %
+  chance = 1.03 %
+
+============================================================================
+J. Variants: loss, weight decay, activation, rank interventions
+============================================================================
+
+============================================================================
+K. Figures from one main run
+============================================================================
+  weight perturbation (noise sd = sigma x sd of each matrix): 0.0:100%, 0.3:100%, 0.6:81%, 0.9:27%, 1.2:10%, 1.5:5%
