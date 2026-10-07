@@ -97,37 +97,6 @@ python continual_mlp.py --runs results --seeds 0-2     # optional
 | Fig. 9a logit PCA | `fig_logit_pca_transformer.png` |
 | "Free capacity" test (optional) | `analysis_continual/summary.txt` |
 
-## Definitions the paper must state (they differ from earlier drafts)
-
-* **IPR** (MLP) = Fourier IPR of W1's operand-a weights, averaged over units
-  (Doshi et al.). The singular-value IPR is reported separately as
-  `spectral_ipr`.
-* **t_g** = first logged step with test accuracy ≥ 95%.
-* **t_c** = first step ≥ 1,000 where effective rank of W1 falls below 99% of
-  its running maximum.
-* **t_IPR** = first step at or after the end of the baseline window where the
-  metric leaves mean ± k·sd of the window.
-* **Random-k control**: two versions are reported. "Random subset" keeps k
-  randomly chosen singular directions. "Random
-  subspace" projects onto a uniformly random k-dimensional subspace.
-* **Fourier subspace (§5)**: the 5 strongest *distinct* frequencies (f and
-  p−f merged), with cos and sin for each, giving 10 dims. The earlier code
-  counted f and p−f separately, so 4 of its 10 basis vectors were numerical
-  noise. Its result is still printed for comparison.
-* **Random baselines** are simulated for the exact dimensions of each
-  comparison:
-  * weight overlap, 60 in R^194: ≈ 0.487;
-  * Fourier overlap, 10 in R^97: ≈ 0.273;
-  * read/write alignment, 11 in R^128: ≈ 0.248.
-* **Weight perturbation** noise is scaled by each matrix's standard
-  deviation.
-* **Nuclear-norm penalty**: AdamW rescales gradients per parameter, and the
-  loss gradient here is tiny (~1e-6). So even λ = 1e-7 compresses W1 within a
-  few hundred steps; in the smoke test, effective rank fell from 114 to 104
-  after 600 steps. The sweep 1e-8 … 1e-6 therefore runs from weak to
-  dominant. Report ER(W1) just before the baseline's t_g (printed in §J) to
-  show that compression was forced *before* grokking.
-
 ## Smoke test
 
 ```bash
