@@ -108,7 +108,7 @@ python prereg_transformer_timing.py --runs results_holdout   # -> results_holdou
 | Replication on held-out seeds and tasks | `results_holdout/prereg_H1`, `analysis_mul`, `analysis_p113` |
 | Synthetic check of the steepest-drop measure | `analysis_revision` §I |
 
-The `analysis_*` folders with these outputs are included in this repository. Model checkpoints (about 4.3 GB) are archived at [DOI to be added].
+The `analysis_*` folders with these outputs are included in this repository.
 
 ## Smoke test
 
