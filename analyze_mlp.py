@@ -4,8 +4,8 @@ analyze_mlp.py -- every MLP table and figure, recomputed from saved runs.
   python analyze_mlp.py --runs results --out results/analysis_mlp
 
 Reads <runs>/mlp/<exp>/seed*.pt (written by run_mlp.py) and writes
-  summary.txt   human-readable tables (paste into the paper from here)
-  summary.json  the same numbers, machine-readable
+  summary.txt   human-readable tables
+  summary.json  
   fig_*.png     figures
 Sections run only if their experiments exist, so it can be re-run as
 results come in.
