@@ -1,8 +1,8 @@
 # Subspace Crystallization in Grokking
 
-Code for *Subspace Crystallization in Grokking: Rank Compression Tracks the Phase Transition* (Mehendale and Chopra, Lossfunk).
+Code for *Subspace Crystallization in Grokking: Rank Compression Tracks the Phase Transition* (Shlok Mehendale and Paras Chopra, Lossfunk).
 
-Every number and figure in the paper comes from the outputs of these scripts: the `summary.txt` / `summary.json` files and the `fig_*.png` files in the `analysis_*` folders. Nothing is typed in by hand.
+Every number and figure in the paper comes from the outputs of these scripts: the `summary.txt` / `summary.json` files and the `fig_*.png` files in the `analysis_*` folders.
 
 ## Setup
 
