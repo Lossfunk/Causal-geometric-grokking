@@ -26,6 +26,16 @@ pip install torch numpy scipy matplotlib statsmodels transformer_lens
 
 ## 1. Training
 
+The quickest way to run everything is `run_all.sh`:
+
+```bash
+./run_all.sh --list                 # every run, grouped into suites
+./run_all.sh --parallel 4           # train everything on one machine, 4 runs at a time
+./run_all.sh --analyze              # all analyses, after training
+```
+
+It also runs as a Slurm array job (see the header of `run_all.sh`). The individual commands below do the same thing step by step.
+
 ### MLP (261 independent jobs)
 
 ```bash
