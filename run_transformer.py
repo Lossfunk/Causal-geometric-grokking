@@ -1,10 +1,8 @@
 """
 run_transformer.py -- train the one-layer transformer (paper Sec. 2.2).
 
-Same configuration as the July notebook (grokking.ipynb, cell 4), which
-follows Nanda et al. (2023): 4 heads, d_model 128, d_head 32, d_mlp 512,
-ReLU, no LayerNorm, biases frozen, cross-entropy, AdamW(lr 1e-3, wd 1.0,
-betas (0.9, 0.98)), 30% train split, 25k full-batch steps.
+4 heads, d_model 128, d_head 32, d_mlp 512, ReLU, no LayerNorm, biases frozen, cross-entropy, 
+AdamW(lr 1e-3, wd 1.0, betas (0.9, 0.98)), 30% train split, 25k full-batch steps.
 
   python run_transformer.py --seeds 0-14                # T1 main runs
   python run_transformer.py --seeds 0-2 --wd 0.1        # T3 weight-decay arms (also 0.3)
