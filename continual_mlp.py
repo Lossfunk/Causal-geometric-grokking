@@ -1,5 +1,5 @@
 """
-continual_mlp.py -- OPTIONAL: is the complement of the sufficient subspace usable as free capacity for a second task?
+continual_mlp.py -- is the complement of the sufficient subspace usable as free capacity for a second task?
 
 Task 1 = (a+b) mod p : a trained "main" run (W1, readout W2 frozen).
 Task 2 = (a-b) mod p : a new readout head, trained with MSE for --steps.
