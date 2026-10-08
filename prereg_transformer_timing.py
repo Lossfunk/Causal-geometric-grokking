@@ -1,5 +1,5 @@
 """
-prereg_transformer_timing.py -- pre-registered test H1 (PREREGISTRATION.md).
+prereg_transformer_timing.py
 
 Applies the steepest-drop measure, unchanged from analyze_transformer.py, to
 transformer seeds that were not used to define it:
@@ -21,7 +21,7 @@ from scipy import stats
 
 from analyze_transformer import clean, fmt, grokked, load_runs, steepest_drop, t_grok
 
-START = 4000          # fixed in PREREGISTRATION.md
+START = 4000         
 USED_TO_DEFINE = set(range(15))
 
 
@@ -40,7 +40,7 @@ def main():
     if reused:
         raise SystemExit(f"seeds {reused} were used to define the measure; keep only held-out seeds in {args.runs}")
 
-    lines = [f"H1 (pre-registered): steepest ER(W_in) decrease after step {START:,} minus t_g > 0",
+    lines = [f"Steepest ER(W_in) decrease after step {START:,} minus t_g > 0",
              f"held-out seeds found: {sorted(r['seed'] for r in runs)}", ""]
     rows, excluded = [], []
     for r in runs:
@@ -66,7 +66,7 @@ def main():
                   f"t_s - t_g: {fmt(lags, 0, med=True)};  95% CI [{ci[0]:.0f}, {ci[1]:.0f}]",
                   f"one-sided one-sample t-test: t={t:.2f}, p={p:.2e}",
                   f"t_s > t_g in {k}/{len(lags)} seeds; exact sign test p={sign:.2e}",
-                  f"H1 {'SUPPORTED' if p < 0.05 else 'NOT SUPPORTED'} at alpha = 0.05",
+                  f"Hypothesis {'SUPPORTED' if p < 0.05 else 'NOT SUPPORTED'} at alpha = 0.05",
                   "(seeds 0-14, which defined the measure: +964 +- 499 steps, 13/14 after t_g)"]
         res.update(t=float(t), p=float(p), k=k, n=len(lags), sign_p=float(sign), ci=[float(c) for c in ci],
                    mean=float(lags.mean()), sd=float(lags.std(ddof=1)))
