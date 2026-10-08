@@ -1,8 +1,8 @@
-# Subspace Crystallization (Revised experimental setup)
+# Subspace Crystallization in Grokking
 
-Every number and figure in the paper should come from the outputs of these
-scripts: `summary.txt` / `summary.json` and the `fig_*.png` files. Nothing is
-typed in by hand.
+Code for *Subspace Crystallization in Grokking: Rank Compression Tracks the Phase Transition* (Mehendale and Chopra, Lossfunk).
+
+Every number and figure in the paper comes from the outputs of these scripts: the `summary.txt` / `summary.json` files and the `fig_*.png` files in the `analysis_*` folders. Nothing is typed in by hand.
 
 ## Setup
 
@@ -10,92 +10,105 @@ typed in by hand.
 pip install torch numpy scipy matplotlib statsmodels transformer_lens
 ```
 
-`statsmodels` is only needed for the Granger section. `transformer_lens` is
-only needed for the transformer scripts.
+`statsmodels` is only needed for the Granger tests, and `transformer_lens` only for the transformer scripts.
 
-## Configurations (one per architecture)
+## Configurations
 
-| | MLP (`common_mlp.py`) | Transformer (`run_transformer.py`) |
+| | MLP (`common_mlp.py`, `run_mlp.py`) | Transformer (`run_transformer.py`) |
 |---|---|---|
-| loss | **MSE** on one-hot targets | cross-entropy |
-| optimizer | AdamW, lr 1e-3, wd 1e-2 | AdamW, lr 1e-3, wd 1.0, betas (0.9, 0.98) |
-| train split | 35% | 30% |
-| steps | 100,000 full batch | 25,000 full batch |
-| logging | every 500 steps | every 250 steps |
-| seeds | 0–14 | 0–14 |
+| Task | (a+b) mod 97, plus ab mod 97 and (a+b) mod 113 | (a+b) mod 97 |
+| Loss | mean-squared error on one-hot targets | cross-entropy |
+| Optimizer | AdamW, lr 1e-3, weight decay 1e-2, eps 1e-8 | AdamW, lr 1e-3, weight decay 1.0, betas (0.9, 0.98) |
+| Train split | 35% | 30% |
+| Steps | 100,000, full batch | 25,000, full batch |
+| Logging | every 500 steps | every 250 steps |
+| Seeds | 0–14 | 0–14, and 15–29 held out for the replication |
 
+## 1. Training
 
-## Run order
-
-### 1. MLP training (≈ 5 GPU-hours total, 101 jobs, all independent)
+### MLP (261 independent jobs)
 
 ```bash
-python run_mlp.py --list            # shows every job: index, experiment, seed
-python run_mlp.py --exp main        # M1: 15 seeds   (run this first)
-python run_mlp.py --exp random_labels   # M3: negative control + memorizing models
-python run_mlp.py --exp loss_ce         # M5
-python run_mlp.py --exp act_relu ; python run_mlp.py --exp act_gelu      # M7
-python run_mlp.py --exp wd_0 ; python run_mlp.py --exp wd_0.001          # M6 (wd=1e-2 is "main")
-python run_mlp.py --exp wd_0.05 ; python run_mlp.py --exp wd_0.1
-python run_mlp.py --exp nuc_1e-08   # M4a, also nuc_3e-08 nuc_1e-07 nuc_3e-07 nuc_1e-06
-python run_mlp.py --exp rank_8      # M4b, also rank_16 rank_32 rank_48 rank_64 rank_80 rank_96
+python run_mlp.py --list                 # every job: index, experiment, seed
+python run_mlp.py --exp main             # 15 seeds, run this first
+python run_mlp.py --job-index 0 --out results
 ```
 
-The same jobs can run as a Slurm array (the cluster allows 10 jobs at a time):
+The jobs cover the main runs, random-label controls, cross-entropy, weight decay, ReLU/GELU, nuclear-norm penalties, rank-constrained `W1 = A B` (`rank_*`), the two further tasks (`mul_*`, `p113_*`), runs logged every 50 steps (`fine_*`), and optimizer continuations from step 20,000 of the main runs (`cont_*`). As a Slurm array:
 
 ```bash
 #!/bin/bash
-#SBATCH --array=0-100%10
+#SBATCH --array=0-260%10
 #SBATCH --gres=gpu:1
 #SBATCH --time=00:30:00
 python run_mlp.py --job-index $SLURM_ARRAY_TASK_ID --out results
 ```
 
-### 2. Transformer training (≈ 1.5 GPU-hours)
+Run `main` before the `cont_*` jobs, because they start from its checkpoints.
+
+### Transformer
 
 ```bash
-python run_transformer.py --seeds 0-14            # T1
-python run_transformer.py --seeds 0-2 --wd 0.1    # T3
-python run_transformer.py --seeds 0-2 --wd 0.3    # T3
+python run_transformer.py --seeds 0-14 --out results                  # main runs
+python run_transformer.py --seeds 0-2 --wd 0.1 --out results          # negative controls
+python run_transformer.py --seeds 0-2 --wd 0.3 --out results
+python run_transformer.py --seeds 15-29 --out results_holdout         # held-out seeds
+python run_transformer.py --seeds 0-29 --ckpt-every 250 --out results_dense     # dense checkpoints
+python run_transformer.py --seeds 0-2 --wd 0.1 --ckpt-every 250 --out results_dense
+python run_transformer.py --seeds 0-2 --wd 0.3 --ckpt-every 250 --out results_dense
 ```
 
-### 3. Analyses (minutes; rerun any time more results arrive)
+Rank caps write `W = A B` with inner dimension r and save to `results/transformer_cap/<matrix>_r<r>/`:
 
 ```bash
-python analyze_mlp.py --runs results
-python analyze_transformer.py --runs results
-python continual_mlp.py --runs results --seeds 0-2     # optional
+for m in W_in W_E; do for r in 128 32 24 16 8; do
+  python run_transformer.py --seeds 0-4 --factor $m:$r --out results
+done; done
 ```
+
+## 2. Analyses
+
+```bash
+python analyze_mlp.py --runs results                     # -> results/analysis_mlp
+python analyze_transformer.py --runs results             # -> results/analysis_transformer
+python analyze_revision.py --runs results --holdout results_holdout --dense results_dense   # -> results/analysis_revision
+python analyze_mechanics.py --runs results               # -> results/analysis_mechanics
+python analyze_task.py --runs results --task mul         # -> results/analysis_mul
+python analyze_task.py --runs results --task p113        # -> results/analysis_p113
+python prereg_transformer_timing.py --runs results_holdout   # -> results_holdout/prereg_H1
+```
+
+`analyze_revision.py --sections A,B` runs a subset. Each section heading in `summary.txt` names what it computes.
 
 ## Where each paper item comes from
 
 | Paper item | Source |
 |---|---|
-| Fig. 1 training dynamics | `analysis_mlp/fig_training_dynamics.png` (seed 0) |
-| Stage boundaries / Stage-4 ER drop | `analysis_mlp/summary.txt` §A, §J |
-| Fig. 2 weight-decay sweep, "onset vs wd" claim | §J [weight decay], `fig_wd_sweep.png` |
-| Stage 4 under MSE vs CE  | §J [loss], `fig_loss_comparison.png` |
-| §2.1 ReLU/GELU claim | §J [activation], `fig_activation_comparison.png` |
-| Fig. 3a, App. B (causal dims at 4 thresholds) | §E, `fig_causal_dimension.png` |
-| Table 2, MLP row (top/bottom/random) | §E |
-| Complement interventions (keep C, keep C⊥, noise in C vs C⊥) | §E |
-| App. C subspace stability (now including pre-grokking steps) | §F |
-| Activation patching statement | §H |
-| Transplant + Procrustes, App. D | §I |
-| Table 3, Fig. 7a/b, lead–lag statistics | §A, §B, `fig_leadlag_*.png` |
-| Granger analysis (with stationarity check) | §C |
-| IPR claims, onset sensitivity, label-free comparison, false alarms | §D |
-| Rank intervention: penalty from step 0, hard bottleneck | §J [nuclear-norm], [bottleneck] |
-| §5 overlap, Fig. 5 | §G, `fig_fourier_spectra_seeds.png` |
-| Fig. 9b/c PCA, App. G phase + robustness | §K figures |
-| Table 6 (d_c of every transformer matrix), attention paragraph | `analysis_transformer` §B |
-| Table 2, transformer rows | `analysis_transformer` §B/C |
-| Fig. 8 spectra, k95/k99 (variance) | `analysis_transformer` §A, `fig_transformer_spectra.png` |
-| Read/write ("matched filter") alignment + correct baseline | `analysis_transformer` §D, §I |
-| Transformer lead–lag (Table 1 "not analysed" row) | `analysis_transformer` §E |
-| Table 4 IPR sensitivity | `analysis_transformer` §F (and MLP §D) |
-| Fig. 9a logit PCA | `fig_logit_pca_transformer.png` |
-| "Free capacity" test (optional) | `analysis_continual/summary.txt` |
+| Teaser (a): steepest effective-rank fall vs onset and vs fit | `analysis_revision` §A, `fig_tf_ts_vs_tg_tfit.png` |
+| Teaser (b) and the dense transformer table | `analysis_revision` §D, `fig_tf_dense_margin_free.png` |
+| Four training stages of the MLP | `analysis_mlp` §A, §K, `fig_rank_derivatives.png` |
+| Timing table, lead-lag figures | `analysis_mlp` §A, §B (MLP), `analysis_revision` §A (transformer) |
+| Matched-step table | `analysis_revision` §A2 |
+| Runs that never grok, random-label MLPs | `analysis_revision` §A, §B, `fig_mlp_er_random_labels.png` |
+| Granger tests | `analysis_mlp` §C |
+| IPR onset detection | `analysis_mlp` §D, `analysis_transformer` §F |
+| Causal dimensionality, truncation controls, complement interventions | `analysis_mlp` §E, `fig_causal_dimension.png` |
+| Sufficient subspace over training, margin-free counts (MLP) | `analysis_mlp` §E2, §E4, `analysis_revision` §C |
+| Stage-4 widening | `analysis_mlp` §E3, `fig_stage4_widening.png` |
+| Temporal stability of the subspace | `analysis_mlp` §F |
+| Equivalent solutions across seeds (overlap, transplants, CKA) | `analysis_mlp` §G, §I, `analysis_revision` §E |
+| Training variants (weight decay, loss, activation) | `analysis_mlp` §J and its `fig_*_comparison.png`, `fig_wd_sweep.png` |
+| Rank constraints and nuclear-norm penalty (MLP) | `analysis_mlp` §J, `analysis_revision` §G |
+| Rank caps (transformer) | `analysis_revision` §H |
+| Adam state in Stage 4 | `analysis_revision` §F |
+| Optimizer swap | `analysis_mechanics` §A |
+| Transformer dimensionality, spectra, controls | `analysis_transformer` §A–C |
+| Residual-stream alignment | `analysis_transformer` §D, §I |
+| Logit geometry, frequencies, non-grokked runs | `analysis_transformer` §H, §J, §N |
+| Replication on held-out seeds and tasks | `results_holdout/prereg_H1`, `analysis_mul`, `analysis_p113` |
+| Synthetic check of the steepest-drop measure | `analysis_revision` §I |
+
+The `analysis_*` folders with these outputs are included in this repository. Model checkpoints (about 4.3 GB) are archived at [DOI to be added].
 
 ## Smoke test
 
@@ -104,5 +117,4 @@ python run_mlp.py --exp main --seeds 0-1 --steps 600 --log-every 100 --out smoke
 python analyze_mlp.py --runs smoke_outputs
 ```
 
-600 steps is far too short to grok. The smoke test only checks that the code
-runs end to end.
+600 steps is far too short to grok. The smoke test only checks that the code runs end to end.
