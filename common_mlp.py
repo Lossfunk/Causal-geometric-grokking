@@ -1,15 +1,14 @@
 """
 common_mlp.py -- shared code for the mean-field MLP experiments.
 
-Default configuration = the verified 15-seed run (NEW.py, 24 Apr 2026):
+Default configuration = the verified 15-seed run:
   MSE loss on one-hot targets, quadratic activation, width 128,
   mean-field scaling (pre-activations / sqrt(2p), output / width),
   AdamW(lr=1e-3, weight_decay=1e-2), 35% train split, full batch,
   100k steps, metrics logged every 500 steps.
 
 The random-number order (seed -> train/test split -> W1 -> W2) and the
-metric definitions (effective rank, Fourier IPR, onset rules) are identical
-to NEW.py, so seeds 0-14 reproduce its runs on the same hardware.
+metric definitions (effective rank, Fourier IPR, onset rules).
 """
 import math
 import random
