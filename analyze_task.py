@@ -1,6 +1,5 @@
 """
 analyze_task.py -- the paper's key MLP results on a second task
-(pre-registered hypotheses H2-H6 in PREREGISTRATION.md).
 
   python analyze_task.py --runs results --task mul     # multiplication mod 97
   python analyze_task.py --runs results --task p113    # addition mod 113
