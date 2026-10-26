@@ -1,0 +1,80 @@
+Softmax collapse check (fp32): share of training examples whose cross-entropy gradient
+for the correct logit is exactly zero; margins = correct logit - largest other logit.
+
+[transformer, weight decay 1.0, seeds 0-14: 15 runs]
+  seed 0                             end: median margin  16.23, max  41.72, collapsed  37.5% | worst ckpt 24999: collapsed  37.5% (max margin 41.72) | loss jump x44754.9 at step 2000 (min loss 1.1e-07)
+  seed 1                             end: median margin  11.23, max  22.27, collapsed   0.9% | worst ckpt 9000: collapsed  19.4% (max margin 37.04) | loss jump x3455087.5 at step 3250 (min loss 1.0e-07)
+  seed 10                            end: median margin  10.09, max  16.30, collapsed   0.0% | worst ckpt 9000: collapsed   9.4% (max margin 29.12) | loss jump x132152.6 at step 1750 (min loss 8.9e-08)
+  seed 11                            end: median margin  16.77, max  34.49, collapsed  48.0% | worst ckpt 24999: collapsed  48.0% (max margin 34.49) | loss jump x51493.6 at step 3500 (min loss 1.1e-07)
+  seed 12                            end: median margin  10.72, max  17.10, collapsed   0.0% | worst ckpt 7500: collapsed   1.1% (max margin 24.90) | loss jump x760493.7 at step 3250 (min loss 2.7e-07)
+  seed 13                            end: median margin  12.85, max  25.13, collapsed   7.6% | worst ckpt 24999: collapsed   7.6% (max margin 25.13) | loss jump x2812366.7 at step 1750 (min loss 9.5e-08)
+  seed 14                            end: median margin  15.22, max  35.79, collapsed  31.0% | worst ckpt 20000: collapsed  34.1% (max margin 27.85) | loss jump x1810320.3 at step 9000 (min loss 9.1e-08)
+  seed 2                             end: median margin  10.52, max  20.76, collapsed   0.9% | worst ckpt 9000: collapsed   3.0% (max margin 26.41) | loss jump x145688.1 at step 17000 (min loss 1.1e-07)
+  seed 3                             end: median margin  12.71, max  27.70, collapsed   4.0% | worst ckpt 20000: collapsed  52.6% (max margin 30.91) | loss jump x35596.2 at step 14750 (min loss 1.1e-07)
+  seed 4                             end: median margin  14.67, max  27.59, collapsed  18.0% | worst ckpt 20000: collapsed  41.3% (max margin 33.78) | loss jump x257858.2 at step 14750 (min loss 7.9e-08)
+  seed 5                             end: median margin  17.02, max  34.57, collapsed  51.9% | worst ckpt 24999: collapsed  51.9% (max margin 34.57) | loss jump x137663.0 at step 3250 (min loss 1.1e-07)
+  seed 6                             end: median margin  10.02, max  16.69, collapsed   0.0% | worst ckpt 7500: collapsed  40.5% (max margin 22.93) | loss jump x36318.0 at step 21750 (min loss 1.1e-07)
+  seed 7                             end: median margin  10.29, max  21.94, collapsed   1.7% | worst ckpt 15000: collapsed  12.8% (max margin 29.60) | loss jump x34057.0 at step 7750 (min loss 9.5e-08)
+  seed 8                             end: median margin   8.62, max  12.99, collapsed   0.0% | worst ckpt 20000: collapsed   6.7% (max margin 29.85) | loss jump x59675.6 at step 23500 (min loss 1.1e-07)
+  seed 9                             end: median margin  17.00, max  30.77, collapsed  56.6% | worst ckpt 24999: collapsed  56.6% (max margin 30.77) | loss jump x93292.5 at step 6250 (min loss 8.8e-08)
+[transformer, weight decay 1.0, held-out seeds: 15 runs]
+  seed 15                            end: median margin  17.14, max  37.47, collapsed  57.5% | worst ckpt 9000: collapsed  58.8% (max margin 31.98) | loss jump x350761.9 at step 11750 (min loss 8.9e-08)
+  seed 16                            end: median margin  13.19, max  24.24, collapsed   6.0% | worst ckpt 20000: collapsed  53.0% (max margin 30.88) | loss jump x32951.6 at step 4750 (min loss 1.2e-07)
+  seed 17                            end: median margin  10.46, max  20.09, collapsed   0.4% | worst ckpt 20000: collapsed  45.5% (max margin 25.66) | loss jump x33151.4 at step 3500 (min loss 1.0e-07)
+  seed 18                            end: median margin  11.47, max  22.88, collapsed   3.3% | worst ckpt 15000: collapsed  12.1% (max margin 27.27) | loss jump x1723428.7 at step 1750 (min loss 1.2e-07)
+  seed 19                            end: median margin  12.71, max  17.11, collapsed   0.1% | worst ckpt 7500: collapsed  37.2% (max margin 27.86) | loss jump x39101.7 at step 9000 (min loss 1.6e-07)
+  seed 20                            end: median margin  10.79, max  20.42, collapsed   0.9% | worst ckpt 15000: collapsed  18.7% (max margin 31.61) | loss jump x271320.5 at step 16500 (min loss 1.0e-07)
+  seed 21                            end: median margin  16.99, max  29.18, collapsed  54.7% | worst ckpt 24999: collapsed  54.7% (max margin 29.18) | loss jump x136169.2 at step 17250 (min loss 1.0e-07)
+  seed 22                            end: median margin  13.89, max  24.19, collapsed   8.4% | worst ckpt 15000: collapsed  40.1% (max margin 24.93) | loss jump x54086.5 at step 5000 (min loss 1.1e-07)
+  seed 23                            end: median margin   9.78, max  15.93, collapsed   0.0% | worst ckpt 5000: collapsed   7.8% (max margin 31.23) | loss jump x79991.2 at step 5000 (min loss 1.0e-07)
+  seed 24                            end: median margin  16.73, max  32.11, collapsed  46.5% | worst ckpt 20000: collapsed  55.0% (max margin 28.14) | loss jump x50447.1 at step 17500 (min loss 8.7e-08)
+  seed 25                            end: median margin  10.46, max  19.07, collapsed   0.4% | worst ckpt 15000: collapsed  16.0% (max margin 27.54) | loss jump x327452.5 at step 3250 (min loss 1.3e-07)
+  seed 26                            end: median margin  11.23, max  19.37, collapsed   0.5% | worst ckpt 9000: collapsed  36.5% (max margin 32.28) | loss jump x273255.3 at step 6250 (min loss 1.1e-07)
+  seed 27                            end: median margin  13.09, max  27.67, collapsed  10.3% | worst ckpt 15000: collapsed  34.8% (max margin 29.68) | loss jump x45933.6 at step 12250 (min loss 1.1e-07)
+  seed 28                            end: median margin   8.72, max  17.03, collapsed   0.0% | worst ckpt 9000: collapsed  43.3% (max margin 33.63) | loss jump x1533721.6 at step 1750 (min loss 1.1e-07)
+  seed 29                            end: median margin  13.80, max  27.47, collapsed  10.6% | worst ckpt 20000: collapsed  47.9% (max margin 25.73) | loss jump x37181.4 at step 2000 (min loss 9.7e-08)
+[MLP loss_ce: 5 runs]
+  seed 0                             end: median margin  12.14, max  15.35, collapsed   0.0% | worst ckpt 50000: collapsed   0.0% (max margin 16.52) | loss jump x1.0 at step 10500 (min loss 2.2e-05)
+  seed 1                             end: median margin  12.27, max  15.97, collapsed   0.0% | worst ckpt 50000: collapsed   0.0% (max margin 16.79) | loss jump x1.0 at step 11000 (min loss 2.1e-05)
+  seed 2                             end: median margin  12.21, max  15.50, collapsed   0.0% | worst ckpt 50000: collapsed   0.0% (max margin 15.78) | loss jump x1.0 at step 10500 (min loss 2.1e-05)
+  seed 3                             end: median margin  12.24, max  14.95, collapsed   0.0% | worst ckpt 50000: collapsed   0.0% (max margin 15.60) | loss jump x1.0 at step 10500 (min loss 2.1e-05)
+  seed 4                             end: median margin  12.16, max  15.13, collapsed   0.0% | worst ckpt 50000: collapsed   0.0% (max margin 15.92) | loss jump x1.0 at step 10500 (min loss 2.1e-05)
+[MLP loss_ce_lr0.003: 5 runs]
+  seed 0                             end: median margin  12.52, max  16.58, collapsed   0.0% | worst ckpt 99999: collapsed   0.0% (max margin 16.58) | loss jump x1.0 at step 3000 (min loss 1.8e-05)
+  seed 1                             end: median margin  12.61, max  17.24, collapsed   0.0% | worst ckpt 99999: collapsed   0.0% (max margin 17.24) | loss jump x1.0 at step 3000 (min loss 1.7e-05)
+  seed 2                             end: median margin  12.61, max  17.02, collapsed   0.0% | worst ckpt 20000: collapsed   0.0% (max margin 17.55) | loss jump x1.0 at step 3000 (min loss 1.7e-05)
+  seed 3                             end: median margin  12.60, max  15.85, collapsed   0.0% | worst ckpt 99999: collapsed   0.0% (max margin 15.85) | loss jump x1.0 at step 3000 (min loss 1.7e-05)
+  seed 4                             end: median margin  12.58, max  16.28, collapsed   0.0% | worst ckpt 20000: collapsed   0.0% (max margin 16.50) | loss jump x1.0 at step 3000 (min loss 1.7e-05)
+[MLP loss_ce_lr0.01: 5 runs]
+  seed 0                             end: median margin  12.80, max  17.42, collapsed   0.0% | worst ckpt 99999: collapsed   0.0% (max margin 17.42) | loss jump x1.0 at step 1000 (min loss 1.6e-05)
+  seed 1                             end: median margin  12.85, max  15.87, collapsed   0.0% | worst ckpt 50000: collapsed   0.0% (max margin 16.61) | loss jump x1.0 at step 1000 (min loss 1.6e-05)
+  seed 2                             end: median margin  12.80, max  16.33, collapsed   0.0% | worst ckpt 99999: collapsed   0.0% (max margin 16.33) | loss jump x1.0 at step 1000 (min loss 1.6e-05)
+  seed 3                             end: median margin  12.83, max  16.72, collapsed   0.0% | worst ckpt 99999: collapsed   0.0% (max margin 16.72) | loss jump x1.0 at step 1000 (min loss 1.6e-05)
+  seed 4                             end: median margin  12.83, max  16.85, collapsed   0.0% | worst ckpt 99999: collapsed   0.0% (max margin 16.85) | loss jump x1.0 at step 1000 (min loss 1.6e-05)
+[MLP ce_lr0.01_wd0.03: 5 runs]
+  seed 0                             end: median margin  11.76, max  14.15, collapsed   0.0% | worst ckpt 30000: collapsed   0.0% (max margin 14.19) | loss jump x1.0 at step 1000 (min loss 8.0e-05)
+  seed 1                             end: median margin  11.80, max  14.08, collapsed   0.0% | worst ckpt 99999: collapsed   0.0% (max margin 14.08) | loss jump x1.0 at step 1000 (min loss 7.9e-05)
+  seed 2                             end: median margin  11.80, max  14.77, collapsed   0.0% | worst ckpt 99999: collapsed   0.0% (max margin 14.77) | loss jump x1.0 at step 1000 (min loss 7.9e-05)
+  seed 3                             end: median margin  11.86, max  14.79, collapsed   0.0% | worst ckpt 99999: collapsed   0.0% (max margin 14.79) | loss jump x1.0 at step 1000 (min loss 7.8e-05)
+  seed 4                             end: median margin  11.82, max  14.33, collapsed   0.0% | worst ckpt 99999: collapsed   0.0% (max margin 14.33) | loss jump x1.0 at step 1000 (min loss 7.9e-05)
+[MLP ce_lr0.01_wd0.1: 5 runs]
+  seed 0                             end: median margin   4.25, max   5.74, collapsed   0.0% | worst ckpt 50000: collapsed   0.0% (max margin 6.02) | loss jump x1.0 at step 60000 (min loss 2.7e-01)
+  seed 1                             end: median margin   4.30, max   5.59, collapsed   0.0% | worst ckpt 15000: collapsed   0.0% (max margin 5.71) | loss jump x1.0 at step 71500 (min loss 2.7e-01)
+  seed 2                             end: median margin   4.35, max   5.87, collapsed   0.0% | worst ckpt 50000: collapsed   0.0% (max margin 5.88) | loss jump x1.0 at step 73500 (min loss 2.7e-01)
+  seed 3                             end: median margin   4.37, max   5.84, collapsed   0.0% | worst ckpt 50000: collapsed   0.0% (max margin 5.85) | loss jump x1.0 at step 89500 (min loss 2.6e-01)
+  seed 4                             end: median margin   4.31, max   5.84, collapsed   0.0% | worst ckpt 50000: collapsed   0.0% (max margin 5.90) | loss jump x1.0 at step 78500 (min loss 2.7e-01)
+[MLP ce_lr0.01_wd0.3: 5 runs]
+  seed 0                             end: median margin   0.00, max   0.00, collapsed   0.0% | worst ckpt 2500: collapsed   0.0% (max margin 0.24) | loss jump --
+  seed 1                             end: median margin   0.00, max   0.00, collapsed   0.0% | worst ckpt 2500: collapsed   0.0% (max margin 0.13) | loss jump --
+  seed 2                             end: median margin   0.00, max   0.00, collapsed   0.0% | worst ckpt 2500: collapsed   0.0% (max margin 0.18) | loss jump --
+  seed 3                             end: median margin   0.00, max   0.00, collapsed   0.0% | worst ckpt 2500: collapsed   0.0% (max margin 0.22) | loss jump --
+  seed 4                             end: median margin   0.00, max   0.00, collapsed   0.0% | worst ckpt 2500: collapsed   0.0% (max margin 0.23) | loss jump --
+[MLP ce_lr0.01_wd1: 5 runs]
+  seed 0                             end: median margin   0.00, max   0.00, collapsed   0.0% | worst ckpt 0: collapsed   0.0% (max margin 0.00) | loss jump --
+  seed 1                             end: median margin   0.00, max   0.00, collapsed   0.0% | worst ckpt 0: collapsed   0.0% (max margin 0.00) | loss jump --
+  seed 2                             end: median margin   0.00, max   0.00, collapsed   0.0% | worst ckpt 0: collapsed   0.0% (max margin 0.00) | loss jump --
+  seed 3                             end: median margin   0.00, max   0.00, collapsed   0.0% | worst ckpt 0: collapsed   0.0% (max margin 0.00) | loss jump --
+  seed 4                             end: median margin   0.00, max   0.00, collapsed   0.0% | worst ckpt 0: collapsed   0.0% (max margin 0.00) | loss jump --
+
+  -> transformer: runs with any collapsed examples at a saved checkpoint: 30/30; runs with a loss jump > 10x after memorization: 30/30; largest margin seen: 41.72 (fp32 cliff ~16.6)
+  -> cross-entropy MLP: runs with any collapsed examples at a saved checkpoint: 0/35; runs with a loss jump > 10x after memorization: 0/35; largest margin seen: 17.55 (fp32 cliff ~16.6)

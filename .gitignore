@@ -1,0 +1,30 @@
+# smoke tests and logs
+smoke_*/
+*.log
+logs/
+
+# raw runs and checkpoints (archived on Zenodo)
+*.pt
+results/*
+results_holdout/*
+results_dense/
+!results/analysis_mlp/
+!results/analysis_transformer/
+!results/analysis_revision/
+!results/analysis_mechanics/
+!results/analysis_mul/
+!results/analysis_p113/
+!results_holdout/prereg_H1/
+!results/analysis_ce_wd/
+!results/analysis_ce_wd/summary.txt
+
+# not part of this paper
+train/continual_mlp.py
+
+# Python
+__pycache__/
+*.pyc
+test_*/
+results_fixedce/*
+!results_fixedce/analysis_revision/
+!results/analysis_softmax_collapse/
